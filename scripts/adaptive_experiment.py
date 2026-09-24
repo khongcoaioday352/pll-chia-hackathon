@@ -106,6 +106,8 @@ def main() -> None:
     ap.add_argument("--ray-address", default=None)
     ap.add_argument("--proposal-summary", type=pathlib.Path,
                     help="Offline infrastructure check using frozen proposals; NOT a new agent run")
+    ap.add_argument("--seed-run", type=pathlib.Path,
+                    help="Resume a partial live run in a NEW directory, preserving prior model-authored candidates")
     ap.add_argument("--expected-evaluation", type=pathlib.Path,
                     help="Optional exact status matrix for an offline replay audit")
     args = ap.parse_args()
@@ -113,6 +115,8 @@ def main() -> None:
         ap.error("rounds must be 1..3 to keep the fixed baseline equal in size")
     if args.expected_evaluation and not args.proposal_summary:
         ap.error("--expected-evaluation applies only to the offline frozen-proposal replay")
+    if args.proposal_summary and args.seed_run:
+        ap.error("choose either --proposal-summary or --seed-run")
     if not args.proposal_summary and args.backend == "gemini" and not os.getenv("GEMINI_API_KEY"):
         ap.error("GEMINI_API_KEY missing; offline --proposal-summary needs no key")
     rtl, root = args.rtl.resolve(), args.output.resolve()
@@ -130,6 +134,23 @@ def main() -> None:
                    if f"agent_{i}" not in replay["tests"]]
         if missing:
             ap.error(f"frozen summary lacks proposals: {missing}")
+    seed = args.seed_run.resolve() if args.seed_run else None
+    seed_rows: list[dict[str, Any]] = []
+    if seed:
+        if seed == root:
+            ap.error("seed run and output must be different directories")
+        seed_summary = json.loads((seed / "summary.json").read_text())
+        if (seed_summary.get("rtl_sha256") != actual or
+                seed_summary.get("model") != model or
+                not seed_summary.get("classification", "").startswith("New CHIA model run")):
+            ap.error("seed is not a compatible live model run on this exact RTL")
+        rows = seed_summary["tests"]
+        seed_rows = [rows[f"agent_{i}"] for i in range(args.rounds)
+                     if f"agent_{i}" in rows]
+        if (len(seed_rows) != seed_summary["completed_agent_rounds"] or
+                any(f"agent_{i}" not in rows for i in range(len(seed_rows))) or
+                len(seed_rows) == args.rounds):
+            ap.error("seed must contain a contiguous, incomplete agent prefix")
     root.mkdir(parents=True, exist_ok=True)
     dev = prepare(rtl, root / "development_sources")
     ray.init(address=args.ray_address, ignore_reinit_error=True,
@@ -148,11 +169,20 @@ def main() -> None:
                   + "\nDetected so far: " + json.dumps(already)
                   + "\nCreate a valid test for a property not yet covered if possible."
                   + "\nPrevious development feedback:\n" + json.dumps(history))
-        (root / f"prompt_{turn}.txt").write_text(prompt)
-        if offline:
+        if turn < len(seed_rows):
+            # Retain the original prompt and model response as authorship
+            # evidence; the new prompt applies only to NEW model calls.
+            for name in (f"prompt_{turn}.txt", f"proposal_{turn}.txt"):
+                source = seed / name
+                if source.is_file():
+                    shutil.copy2(source, root / name)
+            candidate = validate(seed_rows[turn]["candidate"])
+        elif offline:
+            (root / f"prompt_{turn}.txt").write_text(prompt)
             candidate = validate(replay["tests"][label]["candidate"])
             (root / f"proposal_{turn}.txt").write_text(json.dumps(candidate) + "\n")
         else:
+            (root / f"prompt_{turn}.txt").write_text(prompt)
             try:
                 response = get(agent.prompt.chia_remote(agent, prompt))
                 raw = str(response.result)
@@ -172,8 +202,10 @@ def main() -> None:
                         "detected": row["detected"], "statuses": row["statuses"]})
         (root / "history.json").write_text(json.dumps(history, indent=2) + "\n")
         print(f"{label}: valid={row['original_pass']} development={row['detected']}", flush=True)
-    # No evaluation mutants existed during agent generation. Baselines are
-    # scored by identical simulator calls but were fixed before this experiment.
+    # Evaluation faults are absent from prompts and per-round feedback. In a
+    # resumed experiment the earlier run's evaluated files can exist elsewhere
+    # on disk, but the model has no filesystem tools; record this limitation.
+    # Baselines are fixed before this experiment and use the same simulator.
     if backend_error and not any(name.startswith("agent_") for name in tests):
         partial = {"classification": "Backend failed before any agent proposal",
                    "backend_error_type": backend_error, "model": model,
@@ -196,6 +228,9 @@ def main() -> None:
         "backend_error_type": backend_error,
         "requested_rounds": args.rounds, "completed_agent_rounds": sum(
             name.startswith("agent_") for name in tests),
+        "seed": ({"source_run": str(seed),
+                  "source_summary_sha256": digest(seed / "summary.json"),
+                  "model_authored_proposals_reused": len(seed_rows)} if seed else None),
         "rtl_sha256": actual, "development_faults": list(dev)[1:],
         "evaluation_faults": list(ev)[1:], "tests": tests,
         "development_history": history}
@@ -203,6 +238,8 @@ def main() -> None:
         report[group + "evaluation_detected"] = sorted({fault
             for label, row in tests.items() if label.startswith(group)
             for fault in row["evaluation"]["detected"]})
+    report["complete_comparable_run"] = (backend_error is None and
+        report["completed_agent_rounds"] == args.rounds)
     if offline:
         primary_match = all(row["development"]["statuses"] ==
                             replay["tests"][label]["statuses"]
@@ -219,8 +256,13 @@ def main() -> None:
         report["evaluation_status_match"] = eval_match
         print("Evaluation status matrix:", "MATCH" if eval_match else "DIFF")
     (root / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
-    print("Evaluation agent/baseline:", len(report["agent_evaluation_detected"]),
-          len(report["baseline_evaluation_detected"]), "out of", len(ev)-1)
+    if report["complete_comparable_run"]:
+        print("COMPLETE evaluation agent/baseline:", len(report["agent_evaluation_detected"]),
+              len(report["baseline_evaluation_detected"]), "out of", len(ev)-1)
+    else:
+        print("INCOMPLETE RUN:", report["completed_agent_rounds"], "of",
+              args.rounds, "agent proposals; backend error:", backend_error,
+              "-- evaluation counts are exploratory, not a fair comparison")
     print("Detailed summary:", root / "summary.json")
     if backend_error:
         raise SystemExit(2)
