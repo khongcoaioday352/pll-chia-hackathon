@@ -14,6 +14,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from verify import RTL_FILES, run, validate
+from scripts.replay_summary import FROZEN_RTL_SHA256
 
 
 FAULTS = {
@@ -52,6 +53,8 @@ def main() -> None:
     ap.add_argument("--run", type=pathlib.Path, required=True,
                     help="A completed CHIA run with frozen tests")
     ap.add_argument("--output", type=pathlib.Path, required=True)
+    ap.add_argument("--expected-aggregates", type=pathlib.Path,
+                    help="Optional published aggregate report to audit against")
     args = ap.parse_args()
     rtl, prior, out = args.rtl.resolve(), args.run.resolve(), args.output.resolve()
     if out.exists() and any(out.iterdir()):
@@ -63,8 +66,9 @@ def main() -> None:
     if not any(name.startswith("baseline_") for name in candidates) or not any(
             name.startswith("agent_") for name in candidates):
         ap.error("run needs both agent and baseline tests")
-    expected = json.loads((prior / "runs" / "agent_0" / "original" /
-                           "result.json").read_text())["rtl_sha256"]
+    original_result = prior / "runs" / "agent_0" / "original" / "result.json"
+    expected = (json.loads(original_result.read_text())["rtl_sha256"]
+                if original_result.is_file() else FROZEN_RTL_SHA256)
     actual = {name: digest(rtl / name) for name in RTL_FILES}
     if actual != expected:
         ap.error("RTL hash differs from the run which generated these tests")
@@ -114,6 +118,21 @@ def main() -> None:
                    for fault, status in row["statuses"].items()
                    if status in {"invalid", "compile_error", "tool_error"}]
     print("Tool/compile errors:", tool_errors)
+    if args.expected_aggregates:
+        recorded = json.loads(args.expected_aggregates.read_text())["supplementary_stress"]
+        matched = (
+            report["baseline_valid_count"] == recorded["baseline_valid"]
+            and report["agent_valid_count"] == recorded["agent_valid"]
+            and report["baseline_detected_union"] == sorted(recorded["baseline_detected"])
+            and report["agent_detected_union"] == sorted(recorded["agent_detected"])
+            and not tool_errors and not recorded["tool_or_compile_errors"]
+            and list(FAULTS) == recorded["mutants"]
+        )
+        report["published_aggregates_match"] = matched
+        (out / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
+        print("Published stress summary:", "MATCH" if matched else "DIFF")
+        if not matched:
+            raise SystemExit(1)
     print("Detailed summary:", out / "summary.json")
 
 
