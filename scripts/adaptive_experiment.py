@@ -182,6 +182,12 @@ def main() -> None:
         already = sorted({fault for row in history for fault in row.get("detected", [])})
         prompt = (SPEC + "\nDevelopment fault names: " + ", ".join(list(dev)[1:])
                   + "\nHuman-guided coverage goal this round: " + GOALS[turn]
+                  + ("\nAlso aim for assertions valid on the unmodified RTL "
+                     "when the input reference period is set to "
+                     + ", ".join(map(str, ref_periods)) + " ns. Earlier "
+                     "reference_original entries are pass/fail checks on "
+                     "that original RTL, never evaluation-fault scores."
+                     if ref_periods else "")
                   + "\nDetected so far: " + json.dumps(already)
                   + "\nCreate a valid test for a property not yet covered if possible."
                   + "\nPrevious development feedback:\n" + json.dumps(history))
