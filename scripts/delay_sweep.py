@@ -28,6 +28,8 @@ def main() -> None:
     ap.add_argument("--run", type=pathlib.Path, required=True,
                     help="Completed CHIA run directory containing summary.json and runs/")
     ap.add_argument("--output", type=pathlib.Path, required=True)
+    ap.add_argument("--expected-aggregates", type=pathlib.Path,
+                    help="Compare all three cases to author-reported lab aggregates")
     args = ap.parse_args()
     rtl, prior, output = args.rtl.resolve(), args.run.resolve(), args.output.resolve()
     if output.exists() and any(output.iterdir()):
@@ -98,6 +100,26 @@ def main() -> None:
               f"detected {len(case['agent_detected_union'])}/{len(sources)-1}; "
               f"baseline {case['baseline_valid_count']}/{sum(n.startswith('baseline_') for n in candidates)} valid, "
               f"detected {len(case['baseline_detected_union'])}/{len(sources)-1}", flush=True)
+    if args.expected_aggregates:
+        expected = json.loads(args.expected_aggregates.read_text())
+        same = (expected["rtl_sha256"] == hashes
+                and expected["candidates_sha256"] == report["candidates_sha256"]
+                and set(expected["cases"]) == set(report["cases"]))
+        for label, case in report["cases"].items():
+            row = expected["cases"][label]
+            same = (same and row["delay_multiplier"] == case["delay_multiplier"]
+                    and row["agent_valid_count"] == case["agent_valid_count"]
+                    and row["baseline_valid_count"] == case["baseline_valid_count"]
+                    and row["agent_detected_count"] == len(case["agent_detected_union"])
+                    and row["baseline_detected_count"] == len(case["baseline_detected_union"])
+                    and all(status in ("pass", "fail")
+                            for test in case["tests"].values()
+                            for status in test["statuses"].values()))
+        report["author_reported_aggregates_match"] = bool(same)
+        (output / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
+        print("Author-reported delay aggregates:", "MATCH" if same else "DIFF")
+        if not same:
+            raise SystemExit(1)
     print("Detailed summary:", output / "summary.json")
 
 
