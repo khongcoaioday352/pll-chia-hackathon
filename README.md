@@ -4,6 +4,8 @@
 
 **Measured lab result:** three valid agent-generated tests detect 4/4 selected faults; three fixed tests detect 1/4. Replaying all six saved tests on the lab host produced six `MATCH` rows and `Replay: PASS`. A post hoc seven-fault stress suite gives 5/7 versus 2/7; the behavioral delay sweep gives 4/4 versus 3/4, 1/4, and 3/4 at 90%, 100%, and 110% delay multipliers. These are functional simulation results on one design, with model goals tuned during prior development on the initial four faults; they are not blind generalization, transistor PVT, or post-layout verification.
 
+**Comparison budget audit:** three passing agent candidates generate 7,260 ns of nominal simulated stimulus on the unmodified RTL; three passing fixed-baseline candidates generate 5,710 ns (agent/baseline 1.2715). See [per-test budget evidence](evidence/test_budget_audit.json) and reproduce without Gemini or a simulator using `python3 scripts/audit_test_budget.py --output results/test_budget_audit.json`. The script regenerates each Verilog testbench from its frozen JSON and audits its delays. Equal candidate count is not equal simulated time, CPU time, or strength; the 4/4 versus 1/4 comparison is **not time-matched**.
+
 See `TOP10_STRATEGY.md` for the stronger post-layout validation target and
 the evidence required before making that claim.
 See `PVT_OPTION.md` for the more ambitious PVT design direction and the
