@@ -96,18 +96,21 @@ candidates against the same four primary and seven post hoc source variants.
 Run on a server with Icarus Verilog using an empty output directory:
 
 ```sh
-python3 scripts/time_matched_baseline.py --rtl rtl_gf180_snapshot --summary evidence/gemini_36_three_v2/summary.json --expected-aggregates evidence/time_matched_console_summary.json --output results/time_matched_baseline_replay_v2
+python3 scripts/time_matched_baseline.py --rtl rtl_gf180_snapshot --summary evidence/gemini_36_three_v2/summary.json --expected-aggregates evidence/time_matched_console_summary.json --expected-matrix evidence/time_matched_public_replay_matrix.json --output results/time_matched_baseline_replay_v2
 ```
 
 The author's lab run reported three valid tests in each group, with **4/4
 versus 1/4** on the primary faults and **5/7 versus 2/7** on the post hoc
 stress set; tool/compile errors: zero. The counts did not change after matching
 nominal simulated time. See the [author-reported aggregate with provenance](evidence/time_matched_console_summary.json).
-The full per-test status matrix for this new run remains on the lab server and
-has not yet been independently reviewed or published. Re-execute the command
-above and require `Author-reported aggregate replay: MATCH` to check the
-archived counts; this aggregate check alone does not verify the original
-private per-test matrix.
+The author's [per-test status matrix](evidence/time_matched_public_replay_matrix.json)
+is now archived alongside the aggregate. All six tests retained the same
+original/fault pass/fail statuses as the previously published non-matched run
+on both suites; this is a transcription from lab console output, not an
+independent model run. Re-execute the command above and require both
+`Author-reported aggregate replay: MATCH` and
+`Published matched-time per-test matrix: MATCH`. Raw simulator logs remain on
+the lab host pending review.
 
 This is a **post hoc sensitivity check** planned after seeing the original
 results. It matches simulated nanoseconds, not CPU cost, oracle strength, or
