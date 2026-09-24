@@ -32,11 +32,20 @@ jobs:
             --rtl rtl_gf180_snapshot \
             --output results/ci_replay \
             --include-time-matched
+      - name: Replay 90%, 100%, and 110% behavioral delay cases
+        run: |
+          python3 scripts/delay_sweep.py \
+            --rtl rtl_gf180_snapshot \
+            --run evidence/gemini_36_three_v2 \
+            --expected-aggregates evidence/delay_sweep_console_summary.json \
+            --output results/ci_delay
       - name: Save replay manifest and simulator logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pllguard-offline-replay
-          path: results/ci_replay/
+          path: |
+            results/ci_replay/
+            results/ci_delay/
           if-no-files-found: warn
           retention-days: 7
