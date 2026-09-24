@@ -75,6 +75,8 @@ def main() -> None:
                    default=pathlib.Path("evidence/gemini_36_three_v2/summary.json"))
     p.add_argument("--expected-aggregates", type=pathlib.Path,
                    help="Check each author-reported aggregate against this independent rerun")
+    p.add_argument("--expected-matrix", type=pathlib.Path,
+                   help="Check every original/fault test status against the published matched-time matrix")
     p.add_argument("--output", type=pathlib.Path, required=True)
     args = p.parse_args()
     rtl, output = args.rtl.resolve(), args.output.resolve()
@@ -132,6 +134,21 @@ def main() -> None:
                     and recorded["matched_baseline"]["detected_count"] == len(rows["baseline_detected_union"])
                     and recorded["tool_errors"] == len(rows["tool_errors"]))
         report["author_reported_aggregates_match"] = bool(same)
+    if args.expected_matrix:
+        expected = json.loads(args.expected_matrix.read_text())
+        same = (expected["source_summary_sha256"] == report["source_summary_sha256"]
+                and expected["rtl_sha256"] == hashes
+                and expected["baseline_observe_ns"] == observed
+                and set(expected["suites"]) == set(results))
+        for suite, rows in results.items():
+            recorded = expected["suites"][suite]
+            same = (same and recorded["mutants"] == rows["mutants"]
+                    and set(recorded["tests"]) == set(rows["tests"])
+                    and all(saved["statuses"] == rows["tests"][name]["statuses"]
+                            and saved["original_pass"] == rows["tests"][name]["original_pass"]
+                            and sorted(saved["detected"]) == sorted(rows["tests"][name]["detected"])
+                            for name, saved in recorded["tests"].items()))
+        report["published_matrix_match"] = bool(same)
     output.mkdir(parents=True, exist_ok=True)
     (output / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
     for suite, rows in results.items():
@@ -145,6 +162,11 @@ def main() -> None:
         print("Author-reported aggregate replay:",
               "MATCH" if report["author_reported_aggregates_match"] else "DIFF")
         if not report["author_reported_aggregates_match"]:
+            raise SystemExit(1)
+    if args.expected_matrix:
+        print("Published matched-time per-test matrix:",
+              "MATCH" if report["published_matrix_match"] else "DIFF")
+        if not report["published_matrix_match"]:
             raise SystemExit(1)
     if any(row["tool_errors"] for row in results.values()):
         raise SystemExit(1)
