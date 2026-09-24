@@ -78,7 +78,7 @@ def main() -> None:
         ap.error("rounds must be 1..12")
     if args.backend == "gemini" and not os.environ.get("GEMINI_API_KEY"):
         ap.error("export GEMINI_API_KEY in this shell before running Gemini")
-    model = args.model or ("gemini-2.5-flash" if args.backend == "gemini"
+    model = args.model or ("gemini-3.6-flash" if args.backend == "gemini"
                            else "opencode/big-pickle")
     root = args.output.resolve()
     root.mkdir(parents=True, exist_ok=True)
