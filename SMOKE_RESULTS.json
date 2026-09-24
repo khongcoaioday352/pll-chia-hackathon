@@ -1,0 +1,30 @@
+{
+  "type": "simulator_smoke_only_no_AI_no_CHIA",
+  "source_commit": "27cbe49c90ba5362ad52c9968dd98e035c30c74f",
+  "cases": {
+    "disable": {
+      "original_status": "pass",
+      "mutant_status": "fail",
+      "original_result_line": "RESULT PASS DISABLE",
+      "mutant_result_line": "RESULT FAIL DISABLE edges=21"
+    },
+    "dco_trim_mux": {
+      "original_status": "pass",
+      "mutant_status": "fail",
+      "original_result_line": "RESULT PASS DCO_TRIM fast=22 slow=17",
+      "mutant_result_line": "RESULT FAIL DCO_TRIM fast=22 slow=22"
+    },
+    "dco_trim_ring": {
+      "original_status": "pass",
+      "mutant_status": "fail",
+      "original_result_line": "RESULT PASS DCO_TRIM fast=22 slow=17",
+      "mutant_result_line": "RESULT FAIL DCO_TRIM fast=8 slow=8"
+    },
+    "divider": {
+      "original_status": "pass",
+      "mutant_status": "fail",
+      "original_result_line": "RESULT PASS DIVIDER edges=176",
+      "mutant_result_line": "RESULT FAIL DIVIDER edges=200"
+    }
+  }
+}

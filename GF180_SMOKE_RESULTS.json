@@ -1,0 +1,19 @@
+{
+  "scope": "simulation adapter smoke check, NOT CHIA agent results",
+  "source": "stdcell-pll-main (2)(2).zip; GF180 RTL snapshot from prior user upload; commit unknown",
+  "rtl_sha256": {
+    "digital_pll.v": "a248e88bf36741ba3c2ce417d287e919bf18ae4ccf64e6fe2fc4ddcdc56d49be",
+    "digital_pll_controller.v": "8eccb472147bcaa7832e9d4dcda3fa7c873accdd2a8dcdfbae95fb9281973480",
+    "ring_osc2x13.v": "530110be809366564479d8c4154b0078c63054b773f62c81825eccac8e9d649f"
+  },
+  "simulator": "Verilator 5.49",
+  "baseline_original_status": {
+    "disable": "pass",
+    "dco_trim": "pass",
+    "divider": "pass"
+  },
+  "handwritten_example_status": {
+    "original": "pass",
+    "ignore_enable": "fail"
+  }
+}

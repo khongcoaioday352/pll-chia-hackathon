@@ -1,0 +1,12 @@
+{
+  "ref_period_ns": 40,
+  "steps": [
+    {"op": "set", "resetb": 1, "enable": 1, "dco": 1},
+    {"op": "measure", "name": "active", "ns": 200},
+    {"op": "assert", "left": "active", "operator": "gt", "right": 0},
+    {"op": "set", "enable": 0},
+    {"op": "wait", "ns": 10},
+    {"op": "measure", "name": "stopped", "ns": 200},
+    {"op": "assert", "left": "stopped", "operator": "eq", "right": 0}
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "scope": "direct model CLI -> program compiler -> Verilator; NOT an end-to-end CHIA run",
+  "model": "opencode/big-pickle",
+  "model_generated_program": {
+    "ref_period_ns": 40,
+    "steps": [
+      {
+        "op": "set",
+        "resetb": 1,
+        "enable": 1,
+        "dco": 1,
+        "div": 8,
+        "trim": 0
+      },
+      {
+        "op": "wait",
+        "ns": 20
+      },
+      {
+        "op": "measure",
+        "ns": 400,
+        "name": "fast"
+      },
+      {
+        "op": "set",
+        "trim": 67108863
+      },
+      {
+        "op": "wait",
+        "ns": 40
+      },
+      {
+        "op": "measure",
+        "ns": 400,
+        "name": "slow"
+      },
+      {
+        "op": "assert",
+        "left": "fast",
+        "operator": "gt",
+        "right": "slow"
+      }
+    ]
+  },
+  "statuses": {
+    "original": "pass",
+    "ignore_dco_trim": "pass",
+    "ring_trim_inert": "fail"
+  },
+  "observations": {
+    "original": [
+      "MEASURE fast=86",
+      "MEASURE slow=67",
+      "RESULT PASS PROGRAM"
+    ],
+    "ignore_dco_trim": [
+      "MEASURE fast=86",
+      "MEASURE slow=85",
+      "RESULT PASS PROGRAM"
+    ],
+    "ring_trim_inert": [
+      "MEASURE fast=33",
+      "MEASURE slow=33",
+      "[880000] %Fatal: tb.v:33: Assertion failed in tb: RESULT FAIL ASSERT_6"
+    ]
+  },
+  "rtl": "rtl_gf180_snapshot from user-supplied September 21 ZIP",
+  "limitations": [
+    "Only two mutants evaluated in this direct trial",
+    "One tested mutant escaped a weak > assertion",
+    "Ray/CHIA orchestration not demonstrated in this environment"
+  ]
+}
