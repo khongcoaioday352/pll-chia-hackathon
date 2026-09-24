@@ -87,8 +87,11 @@ python3 scripts/stress_suite.py --rtl rtl_gf180_snapshot --run evidence/gemini_3
 
 A matching run prints `Published stress summary: MATCH` and writes a full
 per-candidate result matrix to `results/stress_public_replay_v1/summary.json`.
-This is a deterministic replay of tests against a post hoc fault suite, not an
-independent new agent-generation run.
+The September 24 lab run printed `Published stress summary: MATCH`, with three
+valid tests in each group, 5/7 versus 2/7 detected and no compile/tool errors.
+The full per-candidate replay summary is retained on the lab server pending a
+privacy review. This is a deterministic replay of tests against a post hoc
+fault suite, not an independent new agent-generation run.
 
 ## Run
 
