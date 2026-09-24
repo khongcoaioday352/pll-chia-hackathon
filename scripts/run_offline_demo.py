@@ -45,8 +45,9 @@ def main() -> None:
     inputs.update({"rtl/" + name: rtl / name for name in (
         "digital_pll.v", "digital_pll_controller.v", "ring_osc2x13.v")})
     if args.include_time_matched:
-        recorded = EVIDENCE / "time_matched_console_summary.json"
-        inputs[str(recorded)] = ROOT / recorded
+        for recorded in (EVIDENCE / "time_matched_console_summary.json",
+                         EVIDENCE / "time_matched_public_replay_matrix.json"):
+            inputs[str(recorded)] = ROOT / recorded
     missing = [name for name, path in inputs.items() if not path.is_file()]
     if missing:
         parser.error(f"missing public input files: {missing}")
@@ -74,6 +75,7 @@ def main() -> None:
         commands.append(("time_matched_post_hoc", [
             SCRIPTS / "time_matched_baseline.py", "--rtl", rtl,
             "--expected-aggregates", EVIDENCE / "time_matched_console_summary.json",
+            "--expected-matrix", EVIDENCE / "time_matched_public_replay_matrix.json",
             "--output", output / "time_matched"],
             output / "time_matched" / "summary.json"))
     for label, command, result in commands:
@@ -109,6 +111,7 @@ def main() -> None:
         matched = json.loads((output / "time_matched" / "summary.json").read_text())
         manifest["post_hoc_time_matched"] = {
             "classification": "new offline measurement; never silently folded into published claims",
+            "published_matrix_match": matched.get("published_matrix_match"),
             "primary_agent_detected": matched["results"]["primary"]["agent_detected_union"],
             "primary_baseline_detected": matched["results"]["primary"]["baseline_detected_union"],
             "stress_agent_detected": matched["results"]["stress_post_hoc"]["agent_detected_union"],
