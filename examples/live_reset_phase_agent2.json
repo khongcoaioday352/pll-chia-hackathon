@@ -1,0 +1,19 @@
+{
+  "ref_period_ns": 40,
+  "steps": [
+    {"op": "set", "resetb": 1, "enable": 1, "dco": 1, "trim": 0},
+    {"op": "wait", "ns": 50},
+    {"op": "measure", "ns": 200, "name": "active_p1", "phase": 1},
+    {"op": "set", "enable": 0},
+    {"op": "wait", "ns": 50},
+    {"op": "measure", "ns": 200, "name": "disabled_p1", "phase": 1},
+    {"op": "set", "enable": 1, "resetb": 0},
+    {"op": "wait", "ns": 50},
+    {"op": "measure", "ns": 200, "name": "reset_p1", "phase": 1},
+    {"op": "set", "resetb": 1},
+    {"op": "wait", "ns": 50},
+    {"op": "measure", "ns": 200, "name": "recovered_p1", "phase": 1},
+    {"op": "assert", "left": "active_p1", "operator": "gt_by", "right": "disabled_p1", "margin": 5},
+    {"op": "assert", "left": "recovered_p1", "operator": "gt_by", "right": "reset_p1", "margin": 5}
+  ]
+}
