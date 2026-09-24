@@ -252,6 +252,7 @@ module ring_osc2x13(reset, trim, clockp);
     wire [1:0] clockp;
     wire [12:0] d;
     wire [1:0] c;
+    wire clockp0_raw;
 
     // Main oscillator loop stages
  
@@ -289,7 +290,11 @@ module ring_osc2x13(reset, trim, clockp);
     );
     gf180mcu_fd_sc_mcu7t5v0__clkinv_8 ibufp01 (
 	.I(c[0]),
-	.ZN(clockp[0])
+	.ZN(clockp0_raw)
+    );
+    gf180mcu_fd_sc_mcu7t5v0__clkbuf_8 ibufp02 (
+        .I(clockp0_raw),
+        .Z(clockp[0])
     );
     gf180mcu_fd_sc_mcu7t5v0__clkinv_2 ibufp10 (
 	.I(d[6]),
