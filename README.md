@@ -77,7 +77,18 @@ RTL and the original four fault variants. Six `MATCH` rows and `Replay: PASS`
 are required before claiming an independent reproduction. No Gemini key is
 used. `scripts/delay_sweep.py` and `scripts/stress_suite.py` evaluate the
 supplementary experiments from a completed lab run and are documented as
-behavioral sensitivity and post hoc stress tests.
+behavioral sensitivity and post hoc stress tests. To reproduce the seven-fault
+post hoc stress suite from the publicly archived candidate programs, without
+Gemini credits or private run files, execute:
+
+```sh
+python3 scripts/stress_suite.py --rtl rtl_gf180_snapshot --run evidence/gemini_36_three_v2 --expected-aggregates evidence/supplementary_console_summary.json --output results/stress_public_replay_v1
+```
+
+A matching run prints `Published stress summary: MATCH` and writes a full
+per-candidate result matrix to `results/stress_public_replay_v1/summary.json`.
+This is a deterministic replay of tests against a post hoc fault suite, not an
+independent new agent-generation run.
 
 ## Run
 
