@@ -1,0 +1,724 @@
+{
+  "classification": "Post hoc input reference period sweep of investigator-modified frozen tests; not new agent output or PVT",
+  "rtl_sha256": {
+    "digital_pll.v": "a248e88bf36741ba3c2ce417d287e919bf18ae4ccf64e6fe2fc4ddcdc56d49be",
+    "digital_pll_controller.v": "8eccb472147bcaa7832e9d4dcda3fa7c873accdd2a8dcdfbae95fb9281973480",
+    "ring_osc2x13.v": "986596591514a2176613dca298b12437641c24268e14824a33777d62b101b74c"
+  },
+  "source_summary_sha256": "36afa0607da9661b519b52450e9fd33da5e5291e1c3401671ec4e4ec2f4b5453",
+  "periods_ns": [
+    30,
+    40,
+    50
+  ],
+  "cases": {
+    "30": {
+      "tests": {
+        "baseline_0": {
+          "candidate": {
+            "kind": "disable",
+            "ref_period_ns": 30,
+            "div": 8,
+            "trim": 0,
+            "observe_ns": 200
+          },
+          "original_pass": true,
+          "detected": [
+            "ignore_enable"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "fail",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "baseline_1": {
+          "candidate": {
+            "kind": "dco_trim",
+            "ref_period_ns": 30,
+            "div": 8,
+            "trim": 0,
+            "observe_ns": 200
+          },
+          "original_pass": true,
+          "detected": [],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "baseline_2": {
+          "candidate": {
+            "kind": "divider",
+            "ref_period_ns": 30,
+            "div": 8,
+            "trim": 0,
+            "observe_ns": 800
+          },
+          "original_pass": false,
+          "detected": [],
+          "statuses": {
+            "original": "fail",
+            "ignore_enable": "fail",
+            "ignore_dco_trim": "fail",
+            "ring_trim_inert": "fail",
+            "controller_target_fixed": "fail"
+          }
+        },
+        "agent_0": {
+          "candidate": {
+            "ref_period_ns": 30,
+            "steps": [
+              {
+                "op": "set",
+                "resetb": 1,
+                "enable": 1,
+                "dco": 1,
+                "trim": 0
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "trim_min"
+              },
+              {
+                "op": "set",
+                "trim": 67108863
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "trim_max"
+              },
+              {
+                "op": "assert",
+                "left": "trim_min",
+                "operator": "gt_by",
+                "right": "trim_max",
+                "margin": 5
+              }
+            ]
+          },
+          "original_pass": true,
+          "detected": [
+            "ignore_dco_trim",
+            "ring_trim_inert"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "fail",
+            "ring_trim_inert": "fail",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "agent_1": {
+          "candidate": {
+            "ref_period_ns": 30,
+            "steps": [
+              {
+                "op": "set",
+                "resetb": 1,
+                "enable": 1,
+                "dco": 0,
+                "div": 6
+              },
+              {
+                "op": "wait",
+                "ns": 2000
+              },
+              {
+                "op": "measure",
+                "ns": 400,
+                "name": "m_div6"
+              },
+              {
+                "op": "set",
+                "div": 16
+              },
+              {
+                "op": "wait",
+                "ns": 2000
+              },
+              {
+                "op": "measure",
+                "ns": 400,
+                "name": "m_div16"
+              },
+              {
+                "op": "assert",
+                "left": "m_div16",
+                "operator": "gt_by",
+                "right": "m_div6",
+                "margin": 10
+              }
+            ]
+          },
+          "original_pass": false,
+          "detected": [],
+          "statuses": {
+            "original": "fail",
+            "ignore_enable": "fail",
+            "ignore_dco_trim": "fail",
+            "ring_trim_inert": "fail",
+            "controller_target_fixed": "fail"
+          }
+        },
+        "agent_2": {
+          "candidate": {
+            "ref_period_ns": 30,
+            "steps": [
+              {
+                "op": "set",
+                "resetb": 1,
+                "enable": 1,
+                "dco": 1,
+                "trim": 1000
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "cnt_on"
+              },
+              {
+                "op": "set",
+                "enable": 0
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "cnt_off"
+              },
+              {
+                "op": "assert",
+                "left": "cnt_on",
+                "operator": "gt_by",
+                "right": "cnt_off",
+                "margin": 10
+              }
+            ]
+          },
+          "original_pass": true,
+          "detected": [
+            "ignore_enable"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "fail",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        }
+      },
+      "tool_errors": [],
+      "agent_original_valid": 2,
+      "agent_detected_union": [
+        "ignore_dco_trim",
+        "ignore_enable",
+        "ring_trim_inert"
+      ],
+      "baseline_original_valid": 2,
+      "baseline_detected_union": [
+        "ignore_enable"
+      ]
+    },
+    "40": {
+      "tests": {
+        "baseline_0": {
+          "candidate": {
+            "kind": "disable",
+            "ref_period_ns": 40,
+            "div": 8,
+            "trim": 0,
+            "observe_ns": 200
+          },
+          "original_pass": true,
+          "detected": [
+            "ignore_enable"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "fail",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "baseline_1": {
+          "candidate": {
+            "kind": "dco_trim",
+            "ref_period_ns": 40,
+            "div": 8,
+            "trim": 0,
+            "observe_ns": 200
+          },
+          "original_pass": true,
+          "detected": [],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "baseline_2": {
+          "candidate": {
+            "kind": "divider",
+            "ref_period_ns": 40,
+            "div": 8,
+            "trim": 0,
+            "observe_ns": 800
+          },
+          "original_pass": true,
+          "detected": [],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "agent_0": {
+          "candidate": {
+            "ref_period_ns": 40,
+            "steps": [
+              {
+                "op": "set",
+                "resetb": 1,
+                "enable": 1,
+                "dco": 1,
+                "trim": 0
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "trim_min"
+              },
+              {
+                "op": "set",
+                "trim": 67108863
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "trim_max"
+              },
+              {
+                "op": "assert",
+                "left": "trim_min",
+                "operator": "gt_by",
+                "right": "trim_max",
+                "margin": 5
+              }
+            ]
+          },
+          "original_pass": true,
+          "detected": [
+            "ignore_dco_trim",
+            "ring_trim_inert"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "fail",
+            "ring_trim_inert": "fail",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "agent_1": {
+          "candidate": {
+            "ref_period_ns": 40,
+            "steps": [
+              {
+                "op": "set",
+                "resetb": 1,
+                "enable": 1,
+                "dco": 0,
+                "div": 6
+              },
+              {
+                "op": "wait",
+                "ns": 2000
+              },
+              {
+                "op": "measure",
+                "ns": 400,
+                "name": "m_div6"
+              },
+              {
+                "op": "set",
+                "div": 16
+              },
+              {
+                "op": "wait",
+                "ns": 2000
+              },
+              {
+                "op": "measure",
+                "ns": 400,
+                "name": "m_div16"
+              },
+              {
+                "op": "assert",
+                "left": "m_div16",
+                "operator": "gt_by",
+                "right": "m_div6",
+                "margin": 10
+              }
+            ]
+          },
+          "original_pass": true,
+          "detected": [
+            "controller_target_fixed",
+            "ring_trim_inert"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "fail",
+            "controller_target_fixed": "fail"
+          }
+        },
+        "agent_2": {
+          "candidate": {
+            "ref_period_ns": 40,
+            "steps": [
+              {
+                "op": "set",
+                "resetb": 1,
+                "enable": 1,
+                "dco": 1,
+                "trim": 1000
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "cnt_on"
+              },
+              {
+                "op": "set",
+                "enable": 0
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "cnt_off"
+              },
+              {
+                "op": "assert",
+                "left": "cnt_on",
+                "operator": "gt_by",
+                "right": "cnt_off",
+                "margin": 10
+              }
+            ]
+          },
+          "original_pass": true,
+          "detected": [
+            "ignore_enable"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "fail",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        }
+      },
+      "tool_errors": [],
+      "agent_original_valid": 3,
+      "agent_detected_union": [
+        "controller_target_fixed",
+        "ignore_dco_trim",
+        "ignore_enable",
+        "ring_trim_inert"
+      ],
+      "baseline_original_valid": 3,
+      "baseline_detected_union": [
+        "ignore_enable"
+      ]
+    },
+    "50": {
+      "tests": {
+        "baseline_0": {
+          "candidate": {
+            "kind": "disable",
+            "ref_period_ns": 50,
+            "div": 8,
+            "trim": 0,
+            "observe_ns": 200
+          },
+          "original_pass": true,
+          "detected": [
+            "ignore_enable"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "fail",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "baseline_1": {
+          "candidate": {
+            "kind": "dco_trim",
+            "ref_period_ns": 50,
+            "div": 8,
+            "trim": 0,
+            "observe_ns": 200
+          },
+          "original_pass": true,
+          "detected": [],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "baseline_2": {
+          "candidate": {
+            "kind": "divider",
+            "ref_period_ns": 50,
+            "div": 8,
+            "trim": 0,
+            "observe_ns": 800
+          },
+          "original_pass": true,
+          "detected": [
+            "ring_trim_inert"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "fail",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "agent_0": {
+          "candidate": {
+            "ref_period_ns": 50,
+            "steps": [
+              {
+                "op": "set",
+                "resetb": 1,
+                "enable": 1,
+                "dco": 1,
+                "trim": 0
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "trim_min"
+              },
+              {
+                "op": "set",
+                "trim": 67108863
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "trim_max"
+              },
+              {
+                "op": "assert",
+                "left": "trim_min",
+                "operator": "gt_by",
+                "right": "trim_max",
+                "margin": 5
+              }
+            ]
+          },
+          "original_pass": true,
+          "detected": [
+            "ignore_dco_trim",
+            "ring_trim_inert"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "fail",
+            "ring_trim_inert": "fail",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "agent_1": {
+          "candidate": {
+            "ref_period_ns": 50,
+            "steps": [
+              {
+                "op": "set",
+                "resetb": 1,
+                "enable": 1,
+                "dco": 0,
+                "div": 6
+              },
+              {
+                "op": "wait",
+                "ns": 2000
+              },
+              {
+                "op": "measure",
+                "ns": 400,
+                "name": "m_div6"
+              },
+              {
+                "op": "set",
+                "div": 16
+              },
+              {
+                "op": "wait",
+                "ns": 2000
+              },
+              {
+                "op": "measure",
+                "ns": 400,
+                "name": "m_div16"
+              },
+              {
+                "op": "assert",
+                "left": "m_div16",
+                "operator": "gt_by",
+                "right": "m_div6",
+                "margin": 10
+              }
+            ]
+          },
+          "original_pass": true,
+          "detected": [
+            "controller_target_fixed",
+            "ring_trim_inert"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "fail",
+            "controller_target_fixed": "fail"
+          }
+        },
+        "agent_2": {
+          "candidate": {
+            "ref_period_ns": 50,
+            "steps": [
+              {
+                "op": "set",
+                "resetb": 1,
+                "enable": 1,
+                "dco": 1,
+                "trim": 1000
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "cnt_on"
+              },
+              {
+                "op": "set",
+                "enable": 0
+              },
+              {
+                "op": "wait",
+                "ns": 100
+              },
+              {
+                "op": "measure",
+                "ns": 500,
+                "name": "cnt_off"
+              },
+              {
+                "op": "assert",
+                "left": "cnt_on",
+                "operator": "gt_by",
+                "right": "cnt_off",
+                "margin": 10
+              }
+            ]
+          },
+          "original_pass": true,
+          "detected": [
+            "ignore_enable"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "fail",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        }
+      },
+      "tool_errors": [],
+      "agent_original_valid": 3,
+      "agent_detected_union": [
+        "controller_target_fixed",
+        "ignore_dco_trim",
+        "ignore_enable",
+        "ring_trim_inert"
+      ],
+      "baseline_original_valid": 3,
+      "baseline_detected_union": [
+        "ignore_enable",
+        "ring_trim_inert"
+      ]
+    }
+  },
+  "nominal_matches_frozen_run": true
+}
