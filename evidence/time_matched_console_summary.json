@@ -1,0 +1,44 @@
+{
+  "classification": "Author-reported post hoc time-matched baseline experiment; not independent or preregistered",
+  "provenance": "User-provided lab console transcript; full per-test result JSON remains on lab server and has not yet been reviewed or published",
+  "source_summary_sha256": "36afa0607da9661b519b52450e9fd33da5e5291e1c3401671ec4e4ec2f4b5453",
+  "rtl_sha256": {
+    "digital_pll.v": "a248e88bf36741ba3c2ce417d287e919bf18ae4ccf64e6fe2fc4ddcdc56d49be",
+    "digital_pll_controller.v": "8eccb472147bcaa7832e9d4dcda3fa7c873accdd2a8dcdfbae95fb9281973480",
+    "ring_osc2x13.v": "986596591514a2176613dca298b12437641c24268e14824a33777d62b101b74c"
+  },
+  "baseline_observe_ns": [
+    595,
+    580,
+    800
+  ],
+  "nominal_total_simulated_time_ns": {
+    "agent": 7260,
+    "matched_baseline": 7260
+  },
+  "primary": {
+    "agent": {
+      "original_valid": 3,
+      "detected_count": 4
+    },
+    "matched_baseline": {
+      "original_valid": 3,
+      "detected_count": 1
+    },
+    "fault_count": 4,
+    "tool_errors": 0
+  },
+  "stress_post_hoc": {
+    "agent": {
+      "original_valid": 3,
+      "detected_count": 5
+    },
+    "matched_baseline": {
+      "original_valid": 3,
+      "detected_count": 2
+    },
+    "fault_count": 7,
+    "tool_errors": 0
+  },
+  "caveat": "Only total simulated time is matched; CPU time, oracle strength, and fault independence are not equalized. Seven-fault stress was chosen post hoc; original agent goals were tuned on primary faults."
+}
