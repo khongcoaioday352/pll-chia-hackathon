@@ -13,6 +13,14 @@ published or replayed in public CI.
 | 40 ns | 4/4 | 7/7 | 4/4 | 4/7 |
 | 50 ns | 4/4 | 7/7 | 4/4 | 6/7 |
 
+At 30 ns, `agent_1` and `baseline_matched_2` failed on the
+unmodified RTL. Both four-test groups missed exactly the same three
+controller faults: `controller_decrease_disabled`,
+`controller_increase_disabled`, and `controller_updates_early`.
+At 50 ns all eight tests passed the unmodified RTL; the time-matched
+control missed `controller_decrease_disabled`, while the agent suite
+missed none. These identities were transcribed from the lab summary.
+
 No simulator, compilation, or test-format errors were reported. The
 40 ns re-evaluation exactly matched the previously published nominal
 per-test matrix. Tests that failed on the unmodified RTL contributed
