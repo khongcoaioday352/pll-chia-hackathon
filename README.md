@@ -84,7 +84,7 @@ it never creates fresh model output or reclassifies the human test as an agent
 result. To additionally measure the post hoc time-matched baseline, pass
 `--include-time-matched` and inspect its result separately.
 
-## Post hoc time-matched baseline check (awaiting lab measurement)
+## Post hoc time-matched baseline check (author-reported lab result)
 
 The first comparison matches the number of candidates (3 versus 3) but the
 agent's generated tests run for 7,260 simulated ns on the passing original RTL
@@ -99,12 +99,18 @@ Run on a server with Icarus Verilog using an empty output directory:
 python3 scripts/time_matched_baseline.py --rtl rtl_gf180_snapshot --summary evidence/gemini_36_three_v2/summary.json --output results/time_matched_baseline_v1
 ```
 
+The author's lab run reported three valid tests in each group, with **4/4
+versus 1/4** on the primary faults and **5/7 versus 2/7** on the post hoc
+stress set; tool/compile errors: zero. The counts did not change after matching
+nominal simulated time. See the [author-reported aggregate with provenance](evidence/time_matched_console_summary.json).
+The full per-test status matrix for this new run remains on the lab server and
+has not yet been independently reviewed or published. Re-execute the command
+above to check it; do not describe the archived aggregate as a full public log.
+
 This is a **post hoc sensitivity check** planned after seeing the original
-results, not a prespecified benchmark or evidence that the two groups have
-equal CPU cost or equivalent test quality. No detection result should be claimed
-until an actual simulator run finishes, its matrix is inspected, and the full
-result is preserved. The measured 4/4 versus 1/4 and 5/7 versus 2/7 results
-above continue to refer only to the original fixed baseline.
+results. It matches simulated nanoseconds, not CPU cost, oracle strength, or
+statistical independence. The headline primary and stress measurements above
+continue to refer to the original fixed baseline.
 
 ## API-free replay of the measured result
 
