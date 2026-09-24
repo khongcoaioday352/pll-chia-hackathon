@@ -112,6 +112,17 @@ independent model run. Re-execute the command above and require both
 `Published matched-time per-test matrix: MATCH`. Raw simulator logs remain on
 the lab host pending review.
 
+If you already ran `results/offline_demo_final_v1` before the public matched-time
+matrix was added, compare its saved JSON without repeating any simulation:
+
+```sh
+python3 scripts/audit_saved_time_matched.py --run results/offline_demo_final_v1/time_matched/summary.json --expected evidence/time_matched_public_replay_matrix.json --output results/offline_demo_final_v1/saved_matrix_audit.json
+```
+
+The expected check is `Saved time-matched matrix: MATCH (78 status cells
+checked)`. This verifies the stored result against the public transcription;
+it does not constitute a second simulator run.
+
 This is a **post hoc sensitivity check** planned after seeing the original
 results. It matches simulated nanoseconds, not CPU cost, oracle strength, or
 statistical independence. The headline primary and stress measurements above
