@@ -146,6 +146,28 @@ new output directory. A failed model request is not a successful trial. Keep
 new outputs private until the agent proposals, raw logs, baseline and source
 hashes have been reviewed.
 
+The first live attempt in `results/adaptive_live_v1` produced **one of the three**
+requested agent tests before a backend error. Its displayed 2/7 agent versus
+2/7 baseline counts are **not a comparable result**: the baseline had three
+tests while the agent had one. This attempt is excluded from competition scores.
+The updated script records `complete_comparable_run` and prints `INCOMPLETE RUN`
+for failures before all requested model proposals are available. Once backend
+access is restored, continue from the original proposal without repeating the
+first paid model call (the seed and output must be different directories):
+
+```sh
+python3 scripts/adaptive_experiment.py --rtl rtl_gf180_snapshot --backend gemini --model gemini-3.6-flash --rounds 3 --seed-run results/adaptive_live_v1 --output results/adaptive_live_resumed_v1
+```
+
+The new run copies the original prompt and model response as authorship
+records and repeats deterministic development scoring before asking the model
+for turns 2 and 3. It reports seed provenance and only compares against three
+baseline tests when `complete_comparable_run` is true. If the model fails again,
+retain the new partial output and use it as the next `--seed-run`; always pick a
+fresh `--output`. The evaluation faults do not appear in prompts or feedback,
+but prior fault outcomes informed human goals. A completed run is guided, not
+historically blind.
+
 ## Run
 
 Requires Python >=3.10, CHIA (`pip install -e /path/to/chia`), Icarus Verilog
