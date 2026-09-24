@@ -33,8 +33,8 @@ exactly {"ref_period_ns":40,"steps":[...]} and ref_period_ns 20..100.
 Actions, in order: {"op":"set","resetb":1,"enable":1,"dco":1,
 "div":8,"trim":0} may set any subset of those ports; resetb/enable/dco
 0..1, div 2..30, trim 0..67108863. {"op":"wait","ns":20} waits.
-{"op":"measure","name":"fast","ns":200} counts rising output edges
-in a fresh window and records the count. {"op":"assert","left":"fast",
+{"op":"measure","name":"fast","ns":200,"phase":1} counts rising output
+edges on clockp[1] in a fresh window. Omit phase to count clockp[0]. {"op":"assert","left":"fast",
 "operator":"gt","right":0} checks a previous measurement against another
 previous measurement name or a nonnegative integer. Operators: eq, ne, gt,
 ge, lt, le.
@@ -70,6 +70,8 @@ def main() -> None:
     ap.add_argument("--rtl", type=pathlib.Path, required=True)
     ap.add_argument("--output", type=pathlib.Path, required=True)
     ap.add_argument("--rounds", type=int, default=3)
+    ap.add_argument("--goal-profile", choices=("original", "reset_phase"),
+                    default="original")
     ap.add_argument("--backend", choices=("opencode", "gemini"), default="opencode")
     ap.add_argument("--model", default=None)
     ap.add_argument("--ray-address", default=None)
@@ -127,6 +129,16 @@ def main() -> None:
         "Feedback mode: test a divider setting other than 8 after enough settling time.",
         "Reset or enable sequencing: verify a clear start/stop behavior.",
     )
+    if args.goal_profile == "reset_phase":
+        # Targeted follow-up after seeing supplementary stress results.
+        goals = (
+            "Assert oscillator edges before resetb=0, zero edges while resetb=0 "
+            "with enable=1, and positive edges after releasing resetb=1.",
+            "Measure clockp[1] with phase=1 in enabled DCO mode and assert "
+            "positive output activity; also compare activity after reset.",
+            "Cover reset asserted during operation and clockp[1] rather than "
+            "repeating a trim-only or divider-only test.",
+        )
     for turn in range(args.rounds):
         prompt = (SPEC + "\nThis round, focus on: " + goals[turn % len(goals)]
                   + "\nPrevious original-design observations:\n"
@@ -156,6 +168,7 @@ def main() -> None:
     # and agent tests get the same mutants and individual run budgets.
     sources = prepare(args.rtl.resolve(), root / "sources")
     summary: dict[str, Any] = {"model": model, "backend": args.backend,
+                               "goal_profile": args.goal_profile,
                                "rounds": args.rounds,
                                "mutants": list(sources)[1:], "tests": {}}
     for label, candidate in candidates:
