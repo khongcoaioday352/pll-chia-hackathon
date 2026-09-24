@@ -44,6 +44,7 @@ jobs:
           python3 scripts/ref_period_sweep.py \
             --rtl rtl_gf180_snapshot \
             --summary evidence/gemini_36_three_v2/summary.json \
+            --expected evidence/ref_period_ci_summary.json \
             --output results/ci_ref_period
       - name: Save replay manifest and simulator logs
         if: always()
