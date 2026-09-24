@@ -91,7 +91,7 @@ unset GEMINI_API_KEY
 `read -rsp` hides the key while typing; export it in the same shell that
 starts Ray. Results and agent logs belong under `results/` and are ignored by
 Git until reviewed. This backend uses Google's official OpenAI-compatible
-endpoint with `gemini-2.5-flash` by default; `--model` selects another available
+endpoint with `gemini-3.6-flash` by default; `--model` selects another available
 Gemini model. Successful authentication and model availability must be checked
 on the actual lab server.
 
