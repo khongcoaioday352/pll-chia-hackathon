@@ -73,6 +73,8 @@ def main() -> None:
     p.add_argument("--rtl", type=pathlib.Path, default=pathlib.Path("rtl_gf180_snapshot"))
     p.add_argument("--summary", type=pathlib.Path,
                    default=pathlib.Path("evidence/gemini_36_three_v2/summary.json"))
+    p.add_argument("--expected-aggregates", type=pathlib.Path,
+                   help="Check each author-reported aggregate against this independent rerun")
     p.add_argument("--output", type=pathlib.Path, required=True)
     args = p.parse_args()
     rtl, output = args.rtl.resolve(), args.output.resolve()
@@ -116,6 +118,20 @@ def main() -> None:
               "simulated_time_ns_by_test": {name: budget(candidate)["simulated_time_ns"]
                                             for name, candidate in candidates.items()},
               "results": results}
+    if args.expected_aggregates:
+        expected = json.loads(args.expected_aggregates.read_text())
+        same = (expected["source_summary_sha256"] == report["source_summary_sha256"]
+                and expected["rtl_sha256"] == hashes
+                and expected["baseline_observe_ns"] == observed)
+        for suite, rows in results.items():
+            recorded = expected[suite]
+            same = (same and recorded["fault_count"] == len(rows["mutants"])
+                    and recorded["agent"]["original_valid"] == rows["agent_original_valid"]
+                    and recorded["matched_baseline"]["original_valid"] == rows["baseline_original_valid"]
+                    and recorded["agent"]["detected_count"] == len(rows["agent_detected_union"])
+                    and recorded["matched_baseline"]["detected_count"] == len(rows["baseline_detected_union"])
+                    and recorded["tool_errors"] == len(rows["tool_errors"]))
+        report["author_reported_aggregates_match"] = bool(same)
     output.mkdir(parents=True, exist_ok=True)
     (output / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
     for suite, rows in results.items():
@@ -125,6 +141,11 @@ def main() -> None:
               f"{len(rows['baseline_detected_union'])}/{len(rows['mutants'])} detected; "
               f"tool errors: {len(rows['tool_errors'])}", flush=True)
     print("Baseline windows (ns):", observed, "| detailed summary:", output / "summary.json")
+    if args.expected_aggregates:
+        print("Author-reported aggregate replay:",
+              "MATCH" if report["author_reported_aggregates_match"] else "DIFF")
+        if not report["author_reported_aggregates_match"]:
+            raise SystemExit(1)
     if any(row["tool_errors"] for row in results.values()):
         raise SystemExit(1)
 
