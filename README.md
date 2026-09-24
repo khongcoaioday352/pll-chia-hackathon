@@ -89,10 +89,10 @@ A matching run prints `Published stress summary: MATCH` and writes a full
 per-candidate result matrix to `results/stress_public_replay_v1/summary.json`.
 The September 24 lab run printed `Published stress summary: MATCH`, with three
 valid tests in each group, 5/7 versus 2/7 detected and no compile/tool errors.
-Its per-test status matrix is archived publicly from the author's console output;
-the added `--expected-matrix` check must still be run on the lab host to establish
-a machine-checked match to the published matrix. Full raw simulation logs remain
-on the lab server pending a privacy review. This is a deterministic replay of tests against a post hoc
+The subsequent lab replay also printed `Published per-test matrix: MATCH`,
+validating each recorded original/fault status against the archived
+[per-test matrix](evidence/stress_public_replay_matrix.json). Full raw simulation
+logs remain on the lab server pending a privacy review. This is a deterministic replay of tests against a post hoc
 fault suite, not an independent new agent-generation run.
 
 ## Run
