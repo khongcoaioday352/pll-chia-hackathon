@@ -1,6 +1,6 @@
 # PLLGuard: agent-generated functional verification of a GF180 digital PLL
 
-**Hackathon artifact:** a CHIA/Gemini loop proposes bounded functional RTL tests; an Icarus Verilog simulator validates them against the unmodified source and injected fault variants. The publicly archived [primary summary](evidence/gemini_36_three_v2/summary.json), [supplementary results](evidence/supplementary_console_summary.json), exact [GF180 RTL snapshot](rtl_gf180_snapshot/), and [API-free replay](scripts/replay_summary.py) permit inspection without additional model credits.
+**Hackathon artifact:** a CHIA/Gemini loop proposes bounded functional RTL tests; an Icarus Verilog simulator validates them against the unmodified source and injected fault variants. The publicly archived [primary summary](evidence/gemini_36_three_v2/summary.json), [supplementary results](evidence/supplementary_console_summary.json), [seven-fault per-test matrix](evidence/stress_public_replay_matrix.json), exact [GF180 RTL snapshot](rtl_gf180_snapshot/), and [API-free replay](scripts/replay_summary.py) permit inspection without additional model credits.
 
 **Measured lab result:** three valid agent-generated tests detect 4/4 selected faults; three fixed tests detect 1/4. Replaying all six saved tests on the lab host produced six `MATCH` rows and `Replay: PASS`. A post hoc seven-fault stress suite gives 5/7 versus 2/7; the behavioral delay sweep gives 4/4 versus 3/4, 1/4, and 3/4 at 90%, 100%, and 110% delay multipliers. These are functional simulation results on one design, with model goals tuned during prior development on the initial four faults; they are not blind generalization, transistor PVT, or post-layout verification.
 
@@ -82,15 +82,17 @@ post hoc stress suite from the publicly archived candidate programs, without
 Gemini credits or private run files, execute:
 
 ```sh
-python3 scripts/stress_suite.py --rtl rtl_gf180_snapshot --run evidence/gemini_36_three_v2 --expected-aggregates evidence/supplementary_console_summary.json --output results/stress_public_replay_v1
+python3 scripts/stress_suite.py --rtl rtl_gf180_snapshot --run evidence/gemini_36_three_v2 --expected-aggregates evidence/supplementary_console_summary.json --expected-matrix evidence/stress_public_replay_matrix.json --output results/stress_matrix_audit_v1
 ```
 
 A matching run prints `Published stress summary: MATCH` and writes a full
 per-candidate result matrix to `results/stress_public_replay_v1/summary.json`.
 The September 24 lab run printed `Published stress summary: MATCH`, with three
 valid tests in each group, 5/7 versus 2/7 detected and no compile/tool errors.
-The full per-candidate replay summary is retained on the lab server pending a
-privacy review. This is a deterministic replay of tests against a post hoc
+Its per-test status matrix is archived publicly from the author's console output;
+the added `--expected-matrix` check must still be run on the lab host to establish
+a machine-checked match to the published matrix. Full raw simulation logs remain
+on the lab server pending a privacy review. This is a deterministic replay of tests against a post hoc
 fault suite, not an independent new agent-generation run.
 
 ## Run
