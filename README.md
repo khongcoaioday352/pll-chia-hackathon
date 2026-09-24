@@ -100,11 +100,12 @@ result. To additionally measure the post hoc time-matched baseline, pass
 The [reproduction workflow](.github/workflows/reproduce.yml) installs Icarus
 Verilog on Ubuntu and runs the offline demo with `--include-time-matched`.
 It replays the behavioral delay sweep too, then saves the manifest and\nsimulator logs as a short-lived workflow artifact.
-You can start it under **Actions → Reproduce PLLGuard evidence → Run workflow**
-if the push that added it did not start a run automatically. A passing workflow
-would verify portability on that GitHub runner; the author's lab results and
-the already reported 78-cell saved-matrix audit are separate observations.
-Do not describe this workflow as successful until its run is green.
+The first [clean-host run](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36031432342)
+finished successfully at commit `e1d2015`, including the published matrices
+and all three behavioral delay cases. The author's original lab results and
+the 78-cell saved-matrix audit are separate observations. Later edits to
+RTL, evidence or replay scripts should produce their own passing run before
+the artifact is frozen.
 
 ## Post hoc time-matched baseline check (author-reported lab result)
 
