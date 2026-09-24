@@ -217,6 +217,36 @@ control shows the language can expose both misses, **without increasing the
 agent's 5/7**. The console-provenance record is in
 [evidence/fault_adequacy_and_adaptive_replay.json](evidence/fault_adequacy_and_adaptive_replay.json).
 
+## Reference-clock sensitivity (investigator-modified programs)
+
+We also changed **only** `ref_period_ns` from the saved 40 ns tests to
+30 ns and 50 ns, symmetrically for all three agent programs and all three
+fixed-baseline programs. This is post hoc input sensitivity, not PVT and not
+fresh model-authored code. The [full per-test outcome matrix](evidence/ref_period_ci_summary.json)
+comes from a [clean-host CI run](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36033500237).
+A [subsequent run](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36033847208)
+matched every published original/fault status cell.
+
+| Reference period | Agent valid on original | Agent faults detected | Baseline valid on original | Baseline faults detected |
+| --- | ---: | ---: | ---: | ---: |
+| 30 ns | 2/3 | 3/4 | 2/3 | 1/4 |
+| 40 ns | 3/3 | 4/4 | 3/3 | 1/4 |
+| 50 ns | 3/3 | 4/4 | 3/3 | 2/4 |
+
+At 30 ns, `agent_1` and `baseline_2` fail the **unmodified** RTL; neither
+can count as a valid detecting test. The missing agent fault is
+`controller_target_fixed`. The nominal 40 ns case reproduces all archived
+statuses, and there were no compile or tool errors. Replay the exact matrix
+without an AI key:
+
+```sh
+python3 scripts/ref_period_sweep.py --rtl rtl_gf180_snapshot --summary evidence/gemini_36_three_v2/summary.json --expected evidence/ref_period_ci_summary.json --output results/ref_period_replay
+```
+
+This narrows the defensible robustness claim: all three saved agent tests
+remain valid and detect 4/4 for 40–50 ns, while only two remain valid at 30 ns.
+It does not show that the PLL locks across reference frequencies or PVT corners.
+
 ## CHIA-native clean-host replay (no model key)
 
 The [CHIA/Ray workflow](.github/workflows/chia-replay.yml) installs the
