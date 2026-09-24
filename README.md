@@ -110,6 +110,32 @@ Report the outcome separately from the agent's 5/7. Until the command has
 been run on the lab host, this is a proposed adequacy check, not a measured
 result.
 
+## Experimental feedback-driven extension (not part of the measured result)
+
+`scripts/adaptive_experiment.py` adds a separate CHIA experiment. It feeds
+per-round results from the four original *development* fault variants back to
+the model and scores the seven supplementary *evaluation* variants only after
+all agent proposals are fixed. The evaluation source variants do not exist on
+disk during proposal generation. Those seven definitions were created after
+the earlier PLLGuard experiments and were already known to the developers;
+this separation within a new run **does not make the evaluation historically
+blind**. Do not treat this new script as an improved measured result until a
+fresh model run and a separate baseline have actually finished.
+
+First audit the orchestration without an API call, using the publicly saved
+three candidates. This is an infrastructure replay and must reproduce the
+previous status vectors, rather than being described as a new agent result:
+
+```sh
+python3 scripts/adaptive_experiment.py --rtl rtl_gf180_snapshot --proposal-summary evidence/gemini_36_three_v2/summary.json --expected-evaluation evidence/stress_public_replay_matrix.json --rounds 3 --output results/adaptive_offline_audit_v1
+```
+
+Only after the offline audit succeeds and model quota is available, a new
+adaptive CHIA run can use `--backend gemini --model gemini-3.6-flash` with a
+new output directory. A failed model request is not a successful trial. Keep
+new outputs private until the agent proposals, raw logs, baseline and source
+hashes have been reviewed.
+
 ## Run
 
 Requires Python >=3.10, CHIA (`pip install -e /path/to/chia`), Icarus Verilog
