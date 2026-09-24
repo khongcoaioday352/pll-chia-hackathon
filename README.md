@@ -99,7 +99,7 @@ result. To additionally measure the post hoc time-matched baseline, pass
 
 The [reproduction workflow](.github/workflows/reproduce.yml) installs Icarus
 Verilog on Ubuntu and runs the offline demo with `--include-time-matched`.
-It saves the manifest and simulator logs as a short-lived workflow artifact.
+It replays the behavioral delay sweep too, then saves the manifest and\nsimulator logs as a short-lived workflow artifact.
 You can start it under **Actions → Reproduce PLLGuard evidence → Run workflow**
 if the push that added it did not start a run automatically. A passing workflow
 would verify portability on that GitHub runner; the author's lab results and
@@ -149,6 +149,23 @@ This is a **post hoc sensitivity check** planned after seeing the original
 results. It matches simulated nanoseconds, not CPU cost, oracle strength, or
 statistical independence. The headline primary and stress measurements above
 continue to refer to the original fixed baseline.
+
+## API-free behavioral delay replay
+
+The three published delay-sweep aggregates can also be checked from the
+public repository without Gemini, Ray, CHIA or private lab run files. With
+Icarus Verilog installed, run from the repository root:
+
+```sh
+python3 scripts/delay_sweep.py --rtl rtl_gf180_snapshot --run evidence/gemini_36_three_v2 --expected-aggregates evidence/delay_sweep_console_summary.json --output results/delay_public_replay_v1
+```
+
+The required final line is `Author-reported delay aggregates: MATCH`.
+The [published expected counts](evidence/delay_sweep_console_summary.json)
+are transcribed from the September 24 lab console output; a matching run
+checks those counts on another host. The script writes all candidate/fault
+statuses to the new output directory for inspection. This remains a
+functional delay-model sensitivity study, not a measurement of silicon PVT.
 
 ## API-free replay of the measured result
 
