@@ -65,6 +65,25 @@ The RTL header describes this design as technically a frequency-locked loop;
 the project name follows its published `digital_pll` module name. The paper
 should state this distinction explicitly.
 
+## One-command offline demo
+
+Reviewers can verify all public deterministic evidence from a clean checkout
+with Python and Icarus Verilog, without a Gemini key, Ray, or a CHIA install:
+
+```sh
+python3 scripts/run_offline_demo.py --rtl rtl_gf180_snapshot --output results/offline_demo_v1
+```
+
+This checks the pinned source, audits the test budget, replays all six frozen
+agent/baseline candidates on the four primary injected faults, matches the
+published seven-fault aggregate and per-test status matrix, and runs the
+**human-authored** adequacy control for the two missed faults. A successful
+run prints `Published evidence: VERIFIED` and writes `manifest.json` with
+input hashes, step status, and output hashes. It replays prior proposals;
+it never creates fresh model output or reclassifies the human test as an agent
+result. To additionally measure the post hoc time-matched baseline, pass
+`--include-time-matched` and inspect its result separately.
+
 ## Post hoc time-matched baseline check (awaiting lab measurement)
 
 The first comparison matches the number of candidates (3 versus 3) but the
