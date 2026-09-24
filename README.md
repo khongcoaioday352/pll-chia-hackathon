@@ -306,7 +306,7 @@ post hoc evaluation faults still are not included in the prompt or per-round
 feedback. This extension was designed after finding the 30 ns validity gap;
 it does not retroactively improve the three published agent tests.
 
-A [CHIA/Ray clean-host audit](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36034170690)
+A [CHIA/Ray clean-host audit](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36034351090)
 with frozen candidates matched the original-four status vectors, seven-fault
 matrix, and public 30/50 ns original-validity matrix. This audit uses **zero**
 new Gemini calls. To rerun that exact check:
