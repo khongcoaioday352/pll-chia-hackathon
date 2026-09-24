@@ -61,7 +61,9 @@ def main() -> None:
     for label, multiplier in (("fast_90pct", .90), ("nominal_100pct", 1.0),
                               ("slow_110pct", 1.10)):
         case_root = output / label
-        clean = case_root / "sources" / "original"
+        # prepare() creates sources/original itself; seed it from a separate
+        # directory to avoid copying each file onto itself.
+        clean = case_root / "seed"
         clean.mkdir(parents=True)
         for filename in (*RTL_FILES, "clockbuf_shim.v"):
             shutil.copy2(rtl / filename, clean / filename)
