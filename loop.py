@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import re
 import shutil
@@ -11,6 +12,7 @@ from typing import Any
 import ray
 from chia.base.ChiaFunction import ChiaFunction, get
 from chia.models.opencode import OpenCodeLLM
+from chia.models.openai_compat import OpenAICompatLLM
 
 from mutants import prepare
 from verify import RTL_FILES, run, validate
@@ -68,11 +70,16 @@ def main() -> None:
     ap.add_argument("--rtl", type=pathlib.Path, required=True)
     ap.add_argument("--output", type=pathlib.Path, required=True)
     ap.add_argument("--rounds", type=int, default=3)
-    ap.add_argument("--model", default="opencode/big-pickle")
+    ap.add_argument("--backend", choices=("opencode", "gemini"), default="opencode")
+    ap.add_argument("--model", default=None)
     ap.add_argument("--ray-address", default=None)
     args = ap.parse_args()
     if not 1 <= args.rounds <= 12:
         ap.error("rounds must be 1..12")
+    if args.backend == "gemini" and not os.environ.get("GEMINI_API_KEY"):
+        ap.error("export GEMINI_API_KEY in this shell before running Gemini")
+    model = args.model or ("gemini-2.5-flash" if args.backend == "gemini"
+                           else "opencode/big-pickle")
     root = args.output.resolve()
     root.mkdir(parents=True, exist_ok=True)
     # Keep the hidden mutations absent from disk until all agent proposals
@@ -84,15 +91,24 @@ def main() -> None:
     # Same-host local Ray is enough for this small design; CHIA functions
     # schedule onto the Ray runtime and preserve profiling instrumentation.
     ray.init(address=args.ray_address, ignore_reinit_error=True,
-             **({"resources": {"opencode_creds": 1}}
+             **({"resources": {"openai_creds" if args.backend == "gemini"
+                               else "opencode_creds": 1}}
                 if args.ray_address is None else {}))
     agent_dir = root / "agent_workspace"
     agent_dir.mkdir(exist_ok=True)
-    agent = OpenCodeLLM(model=args.model, timeout_seconds=180,
-                        retries=1, log_dir=str(root / "agent_logs"),
-                        work_dir=str(agent_dir),
-                        dangerously_skip_permissions=False,
-                        config={"*": "deny"})
+    if args.backend == "gemini":
+        agent = OpenAICompatLLM(
+            model=model, timeout_seconds=180, retries=1,
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            api_key=os.environ["GEMINI_API_KEY"], max_tokens=2048,
+            log_dir=str(root / "agent_logs"),
+        )
+    else:
+        agent = OpenCodeLLM(model=model, timeout_seconds=180,
+                            retries=1, log_dir=str(root / "agent_logs"),
+                            work_dir=str(agent_dir),
+                            dangerously_skip_permissions=False,
+                            config={"*": "deny"})
     # Fixed, predeclared baseline uses the same number of simulator tests
     # as the agent's proposal budget (up to three).
     baseline = [
@@ -131,7 +147,8 @@ def main() -> None:
     # Evaluation is held out until proposals have been fixed. Both baseline
     # and agent tests get the same mutants and individual run budgets.
     sources = prepare(args.rtl.resolve(), root / "sources")
-    summary: dict[str, Any] = {"model": args.model, "rounds": args.rounds,
+    summary: dict[str, Any] = {"model": model, "backend": args.backend,
+                               "rounds": args.rounds,
                                "mutants": list(sources)[1:], "tests": {}}
     for label, candidate in candidates:
         refs = {name: simulate.chia_remote(str(path), candidate,
