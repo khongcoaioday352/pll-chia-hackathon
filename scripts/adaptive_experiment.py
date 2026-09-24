@@ -33,6 +33,16 @@ BASELINE = [
     {"kind": "divider", "ref_period_ns": 40, "div": 8, "trim": 0, "observe_ns": 800},
 ]
 
+# Human-guided interface coverage goals. The final goal was added after the
+# earlier stress result exposed reset/phase blind spots; do not call new runs
+# on those same seven faults historically blind or automatically discovered.
+GOALS = (
+    "Compare DCO-mode output edge counts for low versus high external trim.",
+    "In feedback mode compare output after two distinct divider settings, with settling time.",
+    "Exercise clockp[1] with measure phase=1, resetb asserted while enabled, "
+    "and recovery when resetb returns to 1; include enable=0 if the action budget allows.",
+)
+
 
 def digest(path: pathlib.Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -134,6 +144,7 @@ def main() -> None:
         label = f"agent_{turn}"
         already = sorted({fault for row in history for fault in row.get("detected", [])})
         prompt = (SPEC + "\nDevelopment fault names: " + ", ".join(list(dev)[1:])
+                  + "\nHuman-guided coverage goal this round: " + GOALS[turn]
                   + "\nDetected so far: " + json.dumps(already)
                   + "\nCreate a valid test for a property not yet covered if possible."
                   + "\nPrevious development feedback:\n" + json.dumps(history))
