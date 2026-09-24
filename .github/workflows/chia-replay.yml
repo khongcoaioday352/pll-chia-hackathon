@@ -13,6 +13,7 @@ on:
       - "scripts/stress_suite.py"
       - "evidence/gemini_36_three_v2/summary.json"
       - "evidence/stress_public_replay_matrix.json"
+      - "evidence/ref_period_ci_summary.json"
       - "rtl_gf180_snapshot/**"
   workflow_dispatch:
 
@@ -44,11 +45,23 @@ jobs:
             --expected-evaluation evidence/stress_public_replay_matrix.json \
             --rounds 3 \
             --output results/ci_chia_replay
+      - name: Audit reference-period feedback with CHIA and Ray
+        run: |
+          .venv/bin/python scripts/adaptive_experiment.py \
+            --rtl rtl_gf180_snapshot \
+            --proposal-summary evidence/gemini_36_three_v2/summary.json \
+            --expected-evaluation evidence/stress_public_replay_matrix.json \
+            --ref-periods 30,50 \
+            --expected-reference evidence/ref_period_ci_summary.json \
+            --rounds 3 \
+            --output results/ci_chia_ref_feedback
       - name: Save CHIA replay evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pllguard-chia-offline-replay
-          path: results/ci_chia_replay/
+          path: |
+            results/ci_chia_replay/
+            results/ci_chia_ref_feedback/
           if-no-files-found: warn
           retention-days: 7
