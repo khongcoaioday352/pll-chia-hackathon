@@ -297,6 +297,37 @@ The September 24 lab audit reported `Offline primary statuses: MATCH` and
 candidates. This checks wiring and data separation; no model proposal was
 created in that run. See [console-provenance record](evidence/fault_adequacy_and_adaptive_replay.json).
 
+### Original-only reference-period feedback (experimental)
+
+The adaptive loop can now run additional 30 ns and 50 ns checks on the
+**unmodified** RTL after each proposal. It passes those pass/fail statuses,
+along with development-suite feedback, into the next model prompt. The seven
+post hoc evaluation faults still are not included in the prompt or per-round
+feedback. This extension was designed after finding the 30 ns validity gap;
+it does not retroactively improve the three published agent tests.
+
+A [CHIA/Ray clean-host audit](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36034170690)
+with frozen candidates matched the original-four status vectors, seven-fault
+matrix, and public 30/50 ns original-validity matrix. This audit uses **zero**
+new Gemini calls. To rerun that exact check:
+
+```sh
+python3 scripts/adaptive_experiment.py --rtl rtl_gf180_snapshot --proposal-summary evidence/gemini_36_three_v2/summary.json --expected-evaluation evidence/stress_public_replay_matrix.json --ref-periods 30,50 --expected-reference evidence/ref_period_ci_summary.json --rounds 3 --output results/adaptive_reference_offline
+```
+
+If Gemini Free tier becomes available again, a **new** experiment can reuse
+the first model-authored candidate from the incomplete run while giving
+original-only reference-period feedback on all three turns:
+
+```sh
+python3 scripts/adaptive_experiment.py --rtl rtl_gf180_snapshot --backend gemini --model gemini-3.6-flash --rounds 3 --ref-periods 30,50 --seed-run results/adaptive_live_v1 --output results/adaptive_reference_live_v1
+```
+
+Use an empty output directory and examine `complete_comparable_run` before
+reporting any comparison. This is guided follow-up on already observed gaps,
+not a blind independent benchmark; the two remaining model calls must
+actually complete to produce a new three-test result.
+
 Only after the offline audit succeeds and model quota is available, a new
 adaptive CHIA run can use `--backend gemini --model gemini-3.6-flash` with a
 new output directory. A failed model request is not a successful trial. Keep
