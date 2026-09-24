@@ -124,6 +124,9 @@ def main() -> None:
         report["tests"][f"baseline_matched_{i}"]["statuses"] ==
         matched_prior[f"baseline_{i}"]["statuses"]
         for i in range(3))
+    human_matched = ("matched_human_control_statuses" not in live or
+                     report["tests"]["human_reset_matched"]["statuses"] ==
+                     live["matched_human_control_statuses"])
     live_matches = (report["tests"]["agent_later_reset"]["statuses"] ==
                     live["tests"]["agent_2"]["evaluation"]["statuses"])
     reference = {str(period): run(
@@ -153,9 +156,11 @@ def main() -> None:
               "rtl_sha256": rtl_hash, "faults": list(FAULTS),
               "published_summary_sha256": sha(args.published),
               "live_summary_sha256": sha(live_path),
+              "source_raw_live_summary_sha256": live.get("source_raw_summary_sha256"),
               "published_matrix_match": prior_matches,
               "published_time_matched_matrix_match": matched_prior_matches,
               "live_agent_2_matrix_match": live_matches,
+              "published_human_matched_matrix_match": human_matched,
               "later_agent_reference_original": reference,
               "groups": groups, "tests": report["tests"],
               "tool_errors": report["tool_errors"]}
@@ -168,9 +173,11 @@ def main() -> None:
     print("Prior matrix:", "MATCH" if prior_matches else "DIFF",
           "| matched matrix:", "MATCH" if matched_prior_matches else "DIFF",
           "| live reset matrix:", "MATCH" if live_matches else "DIFF",
+          "| human control matrix:", "MATCH" if human_matched else "DIFF",
           "| ref 30/50:", reference, "| tool errors:", report["tool_errors"])
     print("Detailed summary:", out / "summary.json")
     if (not prior_matches or not matched_prior_matches or not live_matches
+            or not human_matched
             or report["tool_errors"]
             or reference != {"30": "pass", "50": "pass"}):
         raise SystemExit(1)
