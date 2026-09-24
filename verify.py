@@ -69,7 +69,8 @@ def validate_program(candidate: dict[str, Any]) -> dict[str, Any]:
             has_set = True
         elif op in ("wait", "measure"):
             required = {"op", "ns"} if op == "wait" else {"op", "ns", "name"}
-            if set(step) != required:
+            allowed = required | ({"phase"} if op == "measure" else set())
+            if not required <= set(step) or not set(step) <= allowed:
                 raise ValueError(f"{op} fields must be {sorted(required)}")
             ns = bounded_int(step["ns"], 2, 2000, "ns")
             total_ns += ns
@@ -80,6 +81,8 @@ def validate_program(candidate: dict[str, Any]) -> dict[str, Any]:
                     raise ValueError("measure name must be unique and alphanumeric")
                 names.add(name)
                 clean["name"] = name
+                if "phase" in step:
+                    clean["phase"] = bounded_int(step["phase"], 0, 1, "phase")
         elif op == "assert":
             delta = step.get("operator") in ("gt_by", "lt_by")
             expected = {"op", "left", "operator", "right", "margin"} if delta else {"op", "left", "operator", "right"}
@@ -122,8 +125,9 @@ def make_program_tb(p: dict[str, Any]) -> str:
         elif op == "wait":
             lines.append(f"    #{step['ns']};")
         elif op == "measure":
-            lines += ["    edges = 0;", f"    #{step['ns']};",
-                      f"    m_{step['name']} = edges;",
+            counter = "edges1" if step.get("phase", 0) == 1 else "edges"
+            lines += [f"    {counter} = 0;", f"    #{step['ns']};",
+                      f"    m_{step['name']} = {counter};",
                       f"    $display(\"MEASURE {step['name']}=%0d\",m_{step['name']});"]
         else:
             right = f"m_{step['right']}" if isinstance(step["right"], str) else str(step["right"])
@@ -140,12 +144,13 @@ module tb;
   reg [4:0] div=5'd8;
   reg [25:0] ext_trim=0;
   wire [1:0] clockp;
-  integer edges=0;
+  integer edges=0, edges1=0;
 {decl}
   digital_pll dut(.resetb(resetb),.enable(enable),.osc(osc),
     .clockp(clockp),.div(div),.dco(dco),.ext_trim(ext_trim));
   always #{p['ref_period_ns']/2:g} osc = ~osc;
   always @(posedge clockp[0]) edges = edges + 1;
+  always @(posedge clockp[1]) edges1 = edges1 + 1;
   initial begin
     #20;
 {body}
