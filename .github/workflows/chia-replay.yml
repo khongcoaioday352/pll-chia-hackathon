@@ -1,0 +1,54 @@
+name: Replay CHIA orchestration without an API key
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/chia-replay.yml"
+      - "chia-source-16c35e9.tar.gz"
+      - "loop.py"
+      - "mutants.py"
+      - "verify.py"
+      - "scripts/adaptive_experiment.py"
+      - "scripts/stress_suite.py"
+      - "evidence/gemini_36_three_v2/summary.json"
+      - "evidence/stress_public_replay_matrix.json"
+      - "rtl_gf180_snapshot/**"
+  workflow_dispatch:
+
+jobs:
+  chia-offline-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Check out public artifact
+        uses: actions/checkout@v4
+      - name: Install simulator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Install pinned CHIA in isolated Python environment
+        run: |
+          python3 -m venv .venv
+          mkdir -p /tmp/pllguard-chia-pinned
+          tar -xzf chia-source-16c35e9.tar.gz -C /tmp/pllguard-chia-pinned
+          .venv/bin/python -m pip install -e /tmp/pllguard-chia-pinned
+          .venv/bin/python -c 'import chia, ray; print("Pinned CHIA and Ray import OK")'
+      - name: Run CHIA-backed offline fault evaluation
+        run: |
+          .venv/bin/python scripts/adaptive_experiment.py \
+            --rtl rtl_gf180_snapshot \
+            --proposal-summary evidence/gemini_36_three_v2/summary.json \
+            --expected-evaluation evidence/stress_public_replay_matrix.json \
+            --rounds 3 \
+            --output results/ci_chia_replay
+      - name: Save CHIA replay evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pllguard-chia-offline-replay
+          path: results/ci_chia_replay/
+          if-no-files-found: warn
+          retention-days: 7
