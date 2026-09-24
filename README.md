@@ -96,7 +96,7 @@ candidates against the same four primary and seven post hoc source variants.
 Run on a server with Icarus Verilog using an empty output directory:
 
 ```sh
-python3 scripts/time_matched_baseline.py --rtl rtl_gf180_snapshot --summary evidence/gemini_36_three_v2/summary.json --output results/time_matched_baseline_v1
+python3 scripts/time_matched_baseline.py --rtl rtl_gf180_snapshot --summary evidence/gemini_36_three_v2/summary.json --expected-aggregates evidence/time_matched_console_summary.json --output results/time_matched_baseline_replay_v2
 ```
 
 The author's lab run reported three valid tests in each group, with **4/4
@@ -105,7 +105,9 @@ stress set; tool/compile errors: zero. The counts did not change after matching
 nominal simulated time. See the [author-reported aggregate with provenance](evidence/time_matched_console_summary.json).
 The full per-test status matrix for this new run remains on the lab server and
 has not yet been independently reviewed or published. Re-execute the command
-above to check it; do not describe the archived aggregate as a full public log.
+above and require `Author-reported aggregate replay: MATCH` to check the
+archived counts; this aggregate check alone does not verify the original
+private per-test matrix.
 
 This is a **post hoc sensitivity check** planned after seeing the original
 results. It matches simulated nanoseconds, not CPU cost, oracle strength, or
