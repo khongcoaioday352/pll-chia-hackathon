@@ -46,6 +46,12 @@ jobs:
             --summary evidence/gemini_36_three_v2/summary.json \
             --expected evidence/ref_period_ci_summary.json \
             --output results/ci_ref_period
+      - name: Replay combined agent and time-matched human control
+        run: |
+          python3 scripts/combined_coverage.py \\
+            --rtl rtl_gf180_snapshot \\
+            --live evidence/adaptive_reference_live_v3_public.json \\
+            --output results/ci_combined
       - name: Save replay manifest and simulator logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -54,6 +60,6 @@ jobs:
           path: |
             results/ci_replay/
             results/ci_delay/
-            results/ci_ref_period/
+            results/ci_ref_period/\n            results/ci_combined/
           if-no-files-found: warn
           retention-days: 7
