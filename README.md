@@ -95,6 +95,17 @@ it never creates fresh model output or reclassifies the human test as an agent
 result. To additionally measure the post hoc time-matched baseline, pass
 `--include-time-matched` and inspect its result separately.
 
+## Independent clean-host replay on GitHub Actions
+
+The [reproduction workflow](.github/workflows/reproduce.yml) installs Icarus
+Verilog on Ubuntu and runs the offline demo with `--include-time-matched`.
+It saves the manifest and simulator logs as a short-lived workflow artifact.
+You can start it under **Actions → Reproduce PLLGuard evidence → Run workflow**
+if the push that added it did not start a run automatically. A passing workflow
+would verify portability on that GitHub runner; the author's lab results and
+the already reported 78-cell saved-matrix audit are separate observations.
+Do not describe this workflow as successful until its run is green.
+
 ## Post hoc time-matched baseline check (author-reported lab result)
 
 The first comparison matches the number of candidates (3 versus 3) but the
