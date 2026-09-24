@@ -1,0 +1,221 @@
+{
+  "classification": "Author-reported post hoc nominal-time-matched baseline matrix; no new agent proposals, not a historically blind evaluation",
+  "provenance": "Transcribed from author's lab console output for results/time_matched_baseline_v1/summary.json; raw simulator logs remain on lab host.",
+  "source_summary_sha256": "36afa0607da9661b519b52450e9fd33da5e5291e1c3401671ec4e4ec2f4b5453",
+  "rtl_sha256": {
+    "digital_pll.v": "a248e88bf36741ba3c2ce417d287e919bf18ae4ccf64e6fe2fc4ddcdc56d49be",
+    "digital_pll_controller.v": "8eccb472147bcaa7832e9d4dcda3fa7c873accdd2a8dcdfbae95fb9281973480",
+    "ring_osc2x13.v": "986596591514a2176613dca298b12437641c24268e14824a33777d62b101b74c"
+  },
+  "baseline_observe_ns": [
+    595,
+    580,
+    800
+  ],
+  "nominal_total_simulated_time_ns": {
+    "agent": 7260,
+    "matched_baseline": 7260
+  },
+  "suites": {
+    "primary": {
+      "mutants": [
+        "ignore_enable",
+        "ignore_dco_trim",
+        "ring_trim_inert",
+        "controller_target_fixed"
+      ],
+      "tests": {
+        "agent_0": {
+          "original_pass": true,
+          "detected": [
+            "ignore_dco_trim",
+            "ring_trim_inert"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "fail",
+            "ring_trim_inert": "fail",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "agent_1": {
+          "original_pass": true,
+          "detected": [
+            "ring_trim_inert",
+            "controller_target_fixed"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "fail",
+            "controller_target_fixed": "fail"
+          }
+        },
+        "agent_2": {
+          "original_pass": true,
+          "detected": [
+            "ignore_enable"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "fail",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "baseline_0": {
+          "original_pass": true,
+          "detected": [
+            "ignore_enable"
+          ],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "fail",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "baseline_1": {
+          "original_pass": true,
+          "detected": [],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        },
+        "baseline_2": {
+          "original_pass": true,
+          "detected": [],
+          "statuses": {
+            "original": "pass",
+            "ignore_enable": "pass",
+            "ignore_dco_trim": "pass",
+            "ring_trim_inert": "pass",
+            "controller_target_fixed": "pass"
+          }
+        }
+      },
+      "all_statuses_same_as_original_published_run": true
+    },
+    "stress_post_hoc": {
+      "mutants": [
+        "resetb_bypassed",
+        "dco_mode_stuck_external",
+        "controller_increase_disabled",
+        "controller_decrease_disabled",
+        "controller_updates_early",
+        "ring_trim_reversed",
+        "phase1_held_low"
+      ],
+      "tests": {
+        "agent_0": {
+          "original_pass": true,
+          "detected": [
+            "dco_mode_stuck_external",
+            "ring_trim_reversed"
+          ],
+          "statuses": {
+            "original": "pass",
+            "resetb_bypassed": "pass",
+            "dco_mode_stuck_external": "fail",
+            "controller_increase_disabled": "pass",
+            "controller_decrease_disabled": "pass",
+            "controller_updates_early": "pass",
+            "ring_trim_reversed": "fail",
+            "phase1_held_low": "pass"
+          }
+        },
+        "agent_1": {
+          "original_pass": true,
+          "detected": [
+            "dco_mode_stuck_external",
+            "controller_increase_disabled",
+            "controller_decrease_disabled",
+            "controller_updates_early",
+            "ring_trim_reversed"
+          ],
+          "statuses": {
+            "original": "pass",
+            "resetb_bypassed": "pass",
+            "dco_mode_stuck_external": "fail",
+            "controller_increase_disabled": "fail",
+            "controller_decrease_disabled": "fail",
+            "controller_updates_early": "fail",
+            "ring_trim_reversed": "fail",
+            "phase1_held_low": "pass"
+          }
+        },
+        "agent_2": {
+          "original_pass": true,
+          "detected": [],
+          "statuses": {
+            "original": "pass",
+            "resetb_bypassed": "pass",
+            "dco_mode_stuck_external": "pass",
+            "controller_increase_disabled": "pass",
+            "controller_decrease_disabled": "pass",
+            "controller_updates_early": "pass",
+            "ring_trim_reversed": "pass",
+            "phase1_held_low": "pass"
+          }
+        },
+        "baseline_0": {
+          "original_pass": true,
+          "detected": [],
+          "statuses": {
+            "original": "pass",
+            "resetb_bypassed": "pass",
+            "dco_mode_stuck_external": "pass",
+            "controller_increase_disabled": "pass",
+            "controller_decrease_disabled": "pass",
+            "controller_updates_early": "pass",
+            "ring_trim_reversed": "pass",
+            "phase1_held_low": "pass"
+          }
+        },
+        "baseline_1": {
+          "original_pass": true,
+          "detected": [
+            "dco_mode_stuck_external",
+            "ring_trim_reversed"
+          ],
+          "statuses": {
+            "original": "pass",
+            "resetb_bypassed": "pass",
+            "dco_mode_stuck_external": "fail",
+            "controller_increase_disabled": "pass",
+            "controller_decrease_disabled": "pass",
+            "controller_updates_early": "pass",
+            "ring_trim_reversed": "fail",
+            "phase1_held_low": "pass"
+          }
+        },
+        "baseline_2": {
+          "original_pass": true,
+          "detected": [
+            "dco_mode_stuck_external",
+            "ring_trim_reversed"
+          ],
+          "statuses": {
+            "original": "pass",
+            "resetb_bypassed": "pass",
+            "dco_mode_stuck_external": "fail",
+            "controller_increase_disabled": "pass",
+            "controller_decrease_disabled": "pass",
+            "controller_updates_early": "pass",
+            "ring_trim_reversed": "fail",
+            "phase1_held_low": "pass"
+          }
+        }
+      },
+      "all_statuses_same_as_original_published_run": true
+    }
+  }
+}
