@@ -1,0 +1,17 @@
+{
+  "ref_period_ns": 40,
+  "steps": [
+    {"op": "set", "resetb": 1, "enable": 1, "dco": 1, "trim": 0},
+    {"op": "wait", "ns": 80},
+    {"op": "measure", "ns": 200, "name": "phase1_on", "phase": 1},
+    {"op": "assert", "left": "phase1_on", "operator": "gt", "right": 5},
+    {"op": "set", "resetb": 0},
+    {"op": "wait", "ns": 20},
+    {"op": "measure", "ns": 200, "name": "phase1_reset", "phase": 1},
+    {"op": "assert", "left": "phase1_reset", "operator": "eq", "right": 0},
+    {"op": "set", "resetb": 1},
+    {"op": "wait", "ns": 80},
+    {"op": "measure", "ns": 200, "name": "phase1_recovered", "phase": 1},
+    {"op": "assert", "left": "phase1_recovered", "operator": "gt", "right": 5}
+  ]
+}
