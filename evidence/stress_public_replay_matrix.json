@@ -1,0 +1,127 @@
+{
+  "provenance": "Transcribed from the author's lab console output for results/stress_public_replay_v1/summary.json on 2026-09-24; raw simulator logs remain on the lab server.",
+  "classification": "Post hoc seven-fault stress suite; the faults were designed after the primary four-fault results. This is an API-free replay of six frozen candidates, not a blind benchmark or new model-generation run.",
+  "rtl_sha256": {
+    "digital_pll.v": "a248e88bf36741ba3c2ce417d287e919bf18ae4ccf64e6fe2fc4ddcdc56d49be",
+    "digital_pll_controller.v": "8eccb472147bcaa7832e9d4dcda3fa7c873accdd2a8dcdfbae95fb9281973480",
+    "ring_osc2x13.v": "986596591514a2176613dca298b12437641c24268e14824a33777d62b101b74c"
+  },
+  "source_candidates": "evidence/gemini_36_three_v2/summary.json",
+  "generator": "scripts/stress_suite.py",
+  "published_aggregates_match": true,
+  "mutants": [
+    "resetb_bypassed",
+    "dco_mode_stuck_external",
+    "controller_increase_disabled",
+    "controller_decrease_disabled",
+    "controller_updates_early",
+    "ring_trim_reversed",
+    "phase1_held_low"
+  ],
+  "tests": {
+    "agent_0": {
+      "statuses": {
+        "original": "pass",
+        "resetb_bypassed": "pass",
+        "dco_mode_stuck_external": "fail",
+        "controller_increase_disabled": "pass",
+        "controller_decrease_disabled": "pass",
+        "controller_updates_early": "pass",
+        "ring_trim_reversed": "fail",
+        "phase1_held_low": "pass"
+      },
+      "detected": [
+        "dco_mode_stuck_external",
+        "ring_trim_reversed"
+      ]
+    },
+    "agent_1": {
+      "statuses": {
+        "original": "pass",
+        "resetb_bypassed": "pass",
+        "dco_mode_stuck_external": "fail",
+        "controller_increase_disabled": "fail",
+        "controller_decrease_disabled": "fail",
+        "controller_updates_early": "fail",
+        "ring_trim_reversed": "fail",
+        "phase1_held_low": "pass"
+      },
+      "detected": [
+        "controller_decrease_disabled",
+        "controller_increase_disabled",
+        "controller_updates_early",
+        "dco_mode_stuck_external",
+        "ring_trim_reversed"
+      ]
+    },
+    "agent_2": {
+      "statuses": {
+        "original": "pass",
+        "resetb_bypassed": "pass",
+        "dco_mode_stuck_external": "pass",
+        "controller_increase_disabled": "pass",
+        "controller_decrease_disabled": "pass",
+        "controller_updates_early": "pass",
+        "ring_trim_reversed": "pass",
+        "phase1_held_low": "pass"
+      },
+      "detected": []
+    },
+    "baseline_0": {
+      "statuses": {
+        "original": "pass",
+        "resetb_bypassed": "pass",
+        "dco_mode_stuck_external": "pass",
+        "controller_increase_disabled": "pass",
+        "controller_decrease_disabled": "pass",
+        "controller_updates_early": "pass",
+        "ring_trim_reversed": "pass",
+        "phase1_held_low": "pass"
+      },
+      "detected": []
+    },
+    "baseline_1": {
+      "statuses": {
+        "original": "pass",
+        "resetb_bypassed": "pass",
+        "dco_mode_stuck_external": "fail",
+        "controller_increase_disabled": "pass",
+        "controller_decrease_disabled": "pass",
+        "controller_updates_early": "pass",
+        "ring_trim_reversed": "fail",
+        "phase1_held_low": "pass"
+      },
+      "detected": [
+        "dco_mode_stuck_external",
+        "ring_trim_reversed"
+      ]
+    },
+    "baseline_2": {
+      "statuses": {
+        "original": "pass",
+        "resetb_bypassed": "pass",
+        "dco_mode_stuck_external": "fail",
+        "controller_increase_disabled": "pass",
+        "controller_decrease_disabled": "pass",
+        "controller_updates_early": "pass",
+        "ring_trim_reversed": "fail",
+        "phase1_held_low": "pass"
+      },
+      "detected": [
+        "dco_mode_stuck_external",
+        "ring_trim_reversed"
+      ]
+    }
+  },
+  "agent_union": [
+    "dco_mode_stuck_external",
+    "controller_increase_disabled",
+    "controller_decrease_disabled",
+    "controller_updates_early",
+    "ring_trim_reversed"
+  ],
+  "baseline_union": [
+    "dco_mode_stuck_external",
+    "ring_trim_reversed"
+  ]
+}
