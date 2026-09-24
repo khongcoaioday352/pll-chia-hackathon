@@ -217,6 +217,28 @@ control shows the language can expose both misses, **without increasing the
 agent's 5/7**. The console-provenance record is in
 [evidence/fault_adequacy_and_adaptive_replay.json](evidence/fault_adequacy_and_adaptive_replay.json).
 
+## CHIA-native clean-host replay (no model key)
+
+The [CHIA/Ray workflow](.github/workflows/chia-replay.yml) installs the
+bundled pinned CHIA source and Icarus Verilog on a fresh Ubuntu runner.
+It schedules the saved candidate programs through the actual CHIA
+`@ChiaFunction` simulator block and Ray, then checks both the four-fault
+development status vectors and the seven-fault post hoc status matrix.
+The [successful public run](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36033018035)
+reported `Offline primary statuses: MATCH`,
+`Evaluation status matrix: MATCH`, and 5/7 versus 2/7 for the archived
+candidates and baseline. Its job artifact contains the generated sources,
+simulator outputs and CHIA replay summary.
+
+This proves the published loop's **CHIA simulation/orchestration path** can
+run on a clean host. It does not call Gemini or produce a fresh agent proposal,
+and the seven evaluation faults were designed after prior development. On a
+machine with CHIA/Ray and Icarus Verilog already installed, reproduce with:
+
+```sh
+python3 scripts/adaptive_experiment.py --rtl rtl_gf180_snapshot --proposal-summary evidence/gemini_36_three_v2/summary.json --expected-evaluation evidence/stress_public_replay_matrix.json --rounds 3 --output results/chia_offline_replay
+```
+
 ## Experimental feedback-driven extension (not part of the measured result)
 
 `scripts/adaptive_experiment.py` adds a separate CHIA experiment. It feeds
