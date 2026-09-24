@@ -47,6 +47,11 @@ python scripts/combined_coverage.py --rtl rtl_gf180_snapshot \
   --output results/combined_coverage_replay
 ```
 
-The live summary's per-test matrix and source hash still need to be
-published in a sanitized evidence artifact before this new result can
-be reproduced from a fresh checkout without the lab host.
+A curated, explicitly labeled console transcript containing the new
+candidate, source raw-summary SHA-256, exact evaluation status matrix, and
+matched human-control status matrix is published as
+`evidence/adaptive_reference_live_v3_public.json`. Re-run from a clean
+checkout by using that JSON as the `--live` argument. The GitHub Actions
+workflow `reproduce.yml` performs this run and retains simulation logs.
+The complete raw model conversation and simulator files remain on the lab
+host; this public transcript cannot independently prove model authorship.
