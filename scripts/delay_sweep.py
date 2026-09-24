@@ -26,7 +26,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--rtl", type=pathlib.Path, required=True)
     ap.add_argument("--run", type=pathlib.Path, required=True,
-                    help="Completed CHIA run directory containing summary.json and runs/")
+                    help="Frozen CHIA summary directory; raw runs/ optional with --expected-aggregates")
     ap.add_argument("--output", type=pathlib.Path, required=True)
     ap.add_argument("--expected-aggregates", type=pathlib.Path,
                     help="Compare all three cases to author-reported lab aggregates")
@@ -44,8 +44,16 @@ def main() -> None:
     if not any(n.startswith("baseline_") for n in candidates) or not any(
             n.startswith("agent_") for n in candidates):
         ap.error("completed run must contain baseline and agent candidates")
-    expected_hashes = json.loads((prior / "runs" / "agent_0" / "original" /
-                                  "result.json").read_text())["rtl_sha256"]
+    original_result = prior / "runs" / "agent_0" / "original" / "result.json"
+    if original_result.is_file():
+        expected_hashes = json.loads(original_result.read_text())["rtl_sha256"]
+    elif args.expected_aggregates:
+        # Public evidence retains frozen candidate JSON and source hashes, but
+        # raw per-run files remain on the lab host pending privacy review.
+        expected_hashes = json.loads(args.expected_aggregates.read_text())["rtl_sha256"]
+    else:
+        ap.error("run lacks original result.json; pass --expected-aggregates "
+                 "to replay from the published evidence")
     hashes = {name: sha256(rtl / name) for name in RTL_FILES}
     if hashes != expected_hashes:
         ap.error("RTL does not match the frozen CHIA run; check sync_lab_rtl.sh")
