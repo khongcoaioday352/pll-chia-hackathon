@@ -110,11 +110,27 @@ def main() -> None:
                     help="Resume a partial live run in a NEW directory, preserving prior model-authored candidates")
     ap.add_argument("--expected-evaluation", type=pathlib.Path,
                     help="Optional exact status matrix for an offline replay audit")
+    ap.add_argument("--ref-periods", default="",
+                    help="Extra reference periods in ns, e.g. 30,50; score only original RTL during proposals")
+    ap.add_argument("--expected-reference", type=pathlib.Path,
+                    help="Audit original-RTL reference-period statuses against published matrix (offline only)")
     args = ap.parse_args()
     if not 1 <= args.rounds <= 3:
         ap.error("rounds must be 1..3 to keep the fixed baseline equal in size")
     if args.expected_evaluation and not args.proposal_summary:
         ap.error("--expected-evaluation applies only to the offline frozen-proposal replay")
+    if args.expected_reference and not args.proposal_summary:
+        ap.error("--expected-reference applies only to offline frozen-proposal replay")
+    try:
+        ref_periods = ([int(item) for item in args.ref_periods.split(",")]
+                       if args.ref_periods else [])
+    except ValueError:
+        ap.error("--ref-periods must be comma-separated integers, e.g. 30,50")
+    if (len(ref_periods) != len(set(ref_periods)) or len(ref_periods) > 3 or
+            40 in ref_periods or any(not 20 <= value <= 100 for value in ref_periods)):
+        ap.error("choose up to three distinct periods in 20..100 ns, excluding nominal 40")
+    if args.expected_reference and not ref_periods:
+        ap.error("--expected-reference requires --ref-periods")
     if args.proposal_summary and args.seed_run:
         ap.error("choose either --proposal-summary or --seed-run")
     if not args.proposal_summary and args.backend == "gemini" and not os.getenv("GEMINI_API_KEY"):
@@ -196,10 +212,16 @@ def main() -> None:
                 (root / "history.json").write_text(json.dumps(history, indent=2) + "\n")
                 break
         row = score(candidate, dev, root / "development_runs" / label)
-        tests[label] = {"candidate": candidate, "development": row}
+        reference_original = {str(period): get(simulate.chia_remote(
+            str(dev["original"]), validate({**candidate, "ref_period_ns": period}),
+            str(root / "reference_runs" / label / str(period))))["status"]
+            for period in ref_periods}
+        tests[label] = {"candidate": candidate, "development": row,
+                        "reference_original": reference_original}
         history.append({"turn": turn, "candidate": candidate,
                         "original_pass": row["original_pass"],
-                        "detected": row["detected"], "statuses": row["statuses"]})
+                        "detected": row["detected"], "statuses": row["statuses"],
+                        "reference_original": reference_original})
         (root / "history.json").write_text(json.dumps(history, indent=2) + "\n")
         print(f"{label}: valid={row['original_pass']} development={row['detected']}", flush=True)
     # Evaluation faults are absent from prompts and per-round feedback. In a
@@ -215,8 +237,13 @@ def main() -> None:
         print("Backend failed before agent proposal:", backend_error, flush=True)
         raise SystemExit(2)
     for i, baseline in enumerate(BASELINE[:args.rounds]):
+        reference_original = {str(period): get(simulate.chia_remote(
+            str(dev["original"]), validate({**baseline, "ref_period_ns": period}),
+            str(root / "reference_runs" / f"baseline_{i}" / str(period))))["status"]
+            for period in ref_periods}
         tests[f"baseline_{i}"] = {"candidate": baseline,
-            "development": score(baseline, dev, root / "development_runs" / f"baseline_{i}")}
+            "development": score(baseline, dev, root / "development_runs" / f"baseline_{i}"),
+            "reference_original": reference_original}
     ev = evaluation_sources(rtl, root / "evaluation_sources")
     for label, row in tests.items():
         row["evaluation"] = score(row["candidate"], ev, root / "evaluation_runs" / label)
@@ -231,7 +258,8 @@ def main() -> None:
         "seed": ({"source_run": str(seed),
                   "source_summary_sha256": digest(seed / "summary.json"),
                   "model_authored_proposals_reused": len(seed_rows)} if seed else None),
-        "rtl_sha256": actual, "development_faults": list(dev)[1:],
+        "rtl_sha256": actual, "reference_feedback_periods_ns": ref_periods,
+        "development_faults": list(dev)[1:],
         "evaluation_faults": list(ev)[1:], "tests": tests,
         "development_history": history}
     for group in ("baseline_", "agent_"):
@@ -255,6 +283,16 @@ def main() -> None:
                           for label, row in tests.items()))
         report["evaluation_status_match"] = eval_match
         print("Evaluation status matrix:", "MATCH" if eval_match else "DIFF")
+    if args.expected_reference:
+        expected = json.loads(args.expected_reference.read_text())
+        ref_match = (expected["rtl_sha256"] == actual
+                     and expected["source_summary_sha256"] == digest(args.proposal_summary)
+                     and set(ref_periods) <= set(expected["periods_ns"])
+                     and all(tests[label]["reference_original"][str(period)] ==
+                             expected["cases"][str(period)]["tests"][label]["statuses"]["original"]
+                             for period in ref_periods for label in tests))
+        report["reference_status_match"] = ref_match
+        print("Reference-original feedback matrix:", "MATCH" if ref_match else "DIFF")
     (root / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
     if report["complete_comparable_run"]:
         print("COMPLETE evaluation agent/baseline:", len(report["agent_evaluation_detected"]),
@@ -269,6 +307,8 @@ def main() -> None:
     if offline and not report["offline_primary_status_match"]:
         raise SystemExit(1)
     if args.expected_evaluation and not report["evaluation_status_match"]:
+        raise SystemExit(1)
+    if args.expected_reference and not report["reference_status_match"]:
         raise SystemExit(1)
 
 
