@@ -1,6 +1,6 @@
-# A CHIA Loop for Agent-Generated Verification of a GF180 Digital PLL
+# PLLGuard: agent-generated functional verification of a GF180 digital PLL
 
-See `TOP10_STRATEGY.md` for the stronger post-layout validation target and
+**Hackathon artifact:** a CHIA/Gemini loop proposes bounded functional RTL tests; an Icarus Verilog simulator validates them against the unmodified source and injected fault variants. The publicly archived [primary summary](evidence/gemini_36_three_v2/summary.json), [supplementary results](evidence/supplementary_console_summary.json), exact [GF180 RTL snapshot](rtl_gf180_snapshot/), and [API-free replay](scripts/replay_summary.py) permit inspection without additional model credits.\n\n**Measured lab result:** three valid agent-generated tests detect 4/4 selected faults; three fixed tests detect 1/4. Replaying all six saved tests on the lab host produced six `MATCH` rows and `Replay: PASS`. A post hoc seven-fault stress suite gives 5/7 versus 2/7; the behavioral delay sweep gives 4/4 versus 3/4, 1/4, and 3/4 at 90%, 100%, and 110% delay multipliers. These are functional simulation results on one design, with model goals tuned during prior development on the initial four faults; they are not blind generalization, transistor PVT, or post-layout verification.\n\nSee `TOP10_STRATEGY.md` for the stronger post-layout validation target and
 the evidence required before making that claim.
 See `PVT_OPTION.md` for the more ambitious PVT design direction and the
 multi-corner baseline/variant measurements required before using its title.
@@ -12,8 +12,8 @@ but cannot reach GitHub. It does not bundle pip dependencies.
 
 This repository implements a CHIA loop that asks an AI agent to author new
 black-box stimulus and assertions for a digital PLL. A simulator, not the
-agent, scores each experiment. The held-out RTL mutants are invisible to the
-agent. The measured outcome is mutation detection relative to a fixed baseline.
+agent, scores each experiment. The mutation scores were hidden during the recorded three-turn model run,
+although earlier development informed the prompt goals. The measured outcome is mutation detection relative to a fixed baseline.
 
 ## Status
 
@@ -134,7 +134,7 @@ the requested number of agent proposals.
 The loop records prompts, agent proposals, baseline and mutant outcomes, hashes, logs,
 and a summary JSON. A mutant counts as detected only when the same test passes
 the original RTL and fails the mutant. Compile errors and timeouts are recorded
-separately. Do not tune the agent against held-out mutant identities.
+separately. For a genuinely independent future test, keep new fault identities and outcomes unseen during all prompt development.
 
 ## Evaluation protocol
 
