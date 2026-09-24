@@ -1,0 +1,36 @@
+{
+  "provenance": "Transcribed from lab console output shared by the author on 2026-09-24; raw supplementary run logs remain on the lab server.",
+  "source_run": "results/gemini_36_three_v2",
+  "rtl_sha256": {
+    "digital_pll.v": "a248e88bf36741ba3c2ce417d287e919bf18ae4ccf64e6fe2fc4ddcdc56d49be",
+    "digital_pll_controller.v": "8eccb472147bcaa7832e9d4dcda3fa7c873accdd2a8dcdfbae95fb9281973480",
+    "ring_osc2x13.v": "986596591514a2176613dca298b12437641c24268e14824a33777d62b101b74c"
+  },
+  "behavioral_delay_sweep": {
+    "scope": "FUNCTIONAL oscillator delay parameter scaling, not physical BC/TC/WC PVT",
+    "run_directory": "results/delay_sweep_v2",
+    "fixed_candidates": "exact six programs in evidence/gemini_36_three_v2/summary.json",
+    "mutants": ["ignore_enable", "ignore_dco_trim", "ring_trim_inert", "controller_target_fixed"],
+    "cases": {
+      "fast_90pct": {"agent_valid": 3, "agent_detected_count": 4, "baseline_valid": 3, "baseline_detected_count": 3},
+      "nominal_100pct": {"agent_valid": 3, "agent_detected_count": 4, "baseline_valid": 3, "baseline_detected_count": 1},
+      "slow_110pct": {"agent_valid": 3, "agent_detected_count": 4, "baseline_valid": 3, "baseline_detected_count": 3}
+    }
+  },
+  "supplementary_stress": {
+    "scope": "seven post hoc injected faults designed after primary 4-fault results; not blind evaluation",
+    "run_directory": "results/stress_v1",
+    "mutants": ["resetb_bypassed", "dco_mode_stuck_external", "controller_increase_disabled", "controller_decrease_disabled", "controller_updates_early", "ring_trim_reversed", "phase1_held_low"],
+    "baseline_valid": 3,
+    "baseline_detected": ["dco_mode_stuck_external", "ring_trim_reversed"],
+    "agent_valid": 3,
+    "agent_detected": ["controller_decrease_disabled", "controller_increase_disabled", "controller_updates_early", "dco_mode_stuck_external", "ring_trim_reversed"],
+    "tool_or_compile_errors": []
+  },
+  "exact_primary_replay": {
+    "command": "python3 scripts/replay_summary.py --rtl rtl_gf180_snapshot --output results/replay_v2",
+    "reported_rows": 6,
+    "reported_outcome": "PASS; all six rows MATCH",
+    "raw_replay_comparison_file": "results/replay_v2/comparison.json on the author's lab host"
+  }
+}
