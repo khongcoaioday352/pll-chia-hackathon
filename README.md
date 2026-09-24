@@ -23,10 +23,11 @@ unmodified RTL and detected all four injected fault variants; a fixed,
 three-test baseline detected one of four. Replaying these same frozen tests
 with behavioral oscillator-delay parameters scaled to 90%, 100%, and 110%
 yielded agent detection of 4/4 in each setting and baseline detection of
-3/4, 1/4, and 3/4, respectively. These numbers are based on the user's lab
-run; its raw run evidence and exact lab RTL snapshot are being prepared for
-public release. Do not treat this repository as a fully reproducible results
-release until the corresponding source hash and run files are committed.
+3/4, 1/4, and 3/4, respectively. These numbers come from the author's lab run. The exact tested RTL snapshot
+and the machine-readable three-round summary are published under
+`rtl_gf180_snapshot/` and `evidence/gemini_36_three_v2/`. Raw model transcripts
+and full simulator logs remain on the lab host pending a privacy review.
+The API-free replay below can check the deterministic simulator outcomes.
 
 The four faults are deliberately injected variants, not bugs discovered in
 the upstream design. The prompt goals were adjusted during development after
@@ -43,14 +44,12 @@ in `MODEL_SMOKE_RESULTS.json`, `SMOKE_RESULTS.json`, and
 
 `rtl/` contains a public Efabless Caravel PLL snapshot for local development
 (Apache-2.0, commit `27cbe49c90ba5362ad52c9968dd98e035c30c74f`).
-`rtl_gf180_snapshot/` contains the three GF180 RTL files from the user's
-previous `stdcell-pll-main (2)(2).zip` upload, plus a simulation-only cell
-shim. `reference_tb/tb_digital_pll.v` preserves the author's existing testbench
-as a separate baseline input; it has not been run in this package. That ZIP
-was received September 21, 2026; it may be older than the lab
-server repository. Confirm the source commit and permission to publish these
-derived RTL files before making a public release. Never publish a private
-65 nm PDK, proprietary standard-cell models, or server credentials.
+`rtl_gf180_snapshot/` contains the exact three GF180 RTL files used in the
+September 24 lab run (source repository HEAD `7c54f7c`) plus a simulation-only
+clock-buffer shim. Source SHA-256 is checked by `scripts/replay_summary.py`.
+`reference_tb/tb_digital_pll.v` preserves the author's existing testbench as
+a separate input; it is not the fixed three-test comparison baseline.
+Never publish a private 65 nm PDK, proprietary cell models, or credentials.
 
 The simulator adapter expects three modules: `digital_pll`,
 `digital_pll_controller`, and `ring_osc2x13`. It uses the `FUNCTIONAL` ring
@@ -59,6 +58,22 @@ functional checks, not physical jitter or post-layout timing claims.
 The RTL header describes this design as technically a frequency-locked loop;
 the project name follows its published `digital_pll` module name. The paper
 should state this distinction explicitly.
+
+## API-free replay of the measured result
+
+From the repository root, with CHIA-independent Python and Icarus Verilog (or
+Verilator) installed:
+
+```sh
+python3 scripts/replay_summary.py --rtl rtl_gf180_snapshot --output results/replay_v2
+```
+
+This executes all saved baseline and agent candidates against the unmodified
+RTL and the original four fault variants. Six `MATCH` rows and `Replay: PASS`
+are required before claiming an independent reproduction. No Gemini key is
+used. `scripts/delay_sweep.py` and `scripts/stress_suite.py` evaluate the
+supplementary experiments from a completed lab run and are documented as
+behavioral sensitivity and post hoc stress tests.
 
 ## Run
 
