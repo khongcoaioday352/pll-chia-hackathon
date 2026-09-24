@@ -1,0 +1,9 @@
+.venv/
+vendor/
+results/
+__pycache__/
+agent_workspace/
+agent_logs/
+*.pyc
+core
+core.*
