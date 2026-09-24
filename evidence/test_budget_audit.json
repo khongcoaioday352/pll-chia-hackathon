@@ -1,0 +1,67 @@
+{
+  "scope": "passing original RTL, generated testbench nominal time; not CPU cost",
+  "source_summary_sha256": "36afa0607da9661b519b52450e9fd33da5e5291e1c3401671ec4e4ec2f4b5453",
+  "tests": {
+    "baseline_0": {
+      "simulated_time_ns": 430,
+      "assertions": 2,
+      "observed_phases": [
+        0
+      ],
+      "generated_tb_sha256": "1e9d35615536fc5278cbb791e5c8c87543959aa8e9fdb48461e906f19448e947"
+    },
+    "baseline_1": {
+      "simulated_time_ns": 460,
+      "assertions": 1,
+      "observed_phases": [
+        0
+      ],
+      "generated_tb_sha256": "8a28d2656b57ccc15d4083b39a387e4b288706689e4b38cb3dcb55270a033c82"
+    },
+    "baseline_2": {
+      "simulated_time_ns": 4820,
+      "assertions": 1,
+      "observed_phases": [
+        0
+      ],
+      "generated_tb_sha256": "ac250cacba19df1b3f0c98329b42fb3c11ac6315bf06232f3afcfdf5203e727e"
+    },
+    "agent_0": {
+      "simulated_time_ns": 1220,
+      "assertions": 1,
+      "observed_phases": [
+        0
+      ],
+      "generated_tb_sha256": "3e24958523ce37a23b68124f57ebd7b8096c44328024cc3b331616eef07e2cef"
+    },
+    "agent_1": {
+      "simulated_time_ns": 4820,
+      "assertions": 1,
+      "observed_phases": [
+        0
+      ],
+      "generated_tb_sha256": "0e15120633786a930115faf862be734f4d579a0a666861f8b707ae97d6366fd2"
+    },
+    "agent_2": {
+      "simulated_time_ns": 1220,
+      "assertions": 1,
+      "observed_phases": [
+        0
+      ],
+      "generated_tb_sha256": "9785077209ada3eac304f0123988ceeb9d6978fb3968d63e83d2d4bcdc778610"
+    }
+  },
+  "groups": {
+    "agent": {
+      "tests": 3,
+      "total_simulated_time_ns": 7260,
+      "total_assertions": 3
+    },
+    "baseline": {
+      "tests": 3,
+      "total_simulated_time_ns": 5710,
+      "total_assertions": 4
+    }
+  },
+  "agent_to_baseline_time_ratio": 1.2715
+}
