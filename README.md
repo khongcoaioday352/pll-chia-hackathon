@@ -95,6 +95,21 @@ validating each recorded original/fault status against the archived
 logs remain on the lab server pending a privacy review. This is a deterministic replay of tests against a post hoc
 fault suite, not an independent new agent-generation run.
 
+### Check whether the missed faults are observable
+
+The frozen agent suite missed reset and output phase 1. A **human-authored,
+post hoc** candidate in `examples/phase1_reset_program.json` tests those two
+properties. To check that the test language can detect both injected faults,
+without model credits, run:
+
+```sh
+python3 scripts/check_fault_adequacy.py --rtl rtl_gf180_snapshot --output results/fault_adequacy_v1
+```
+
+Report the outcome separately from the agent's 5/7. Until the command has
+been run on the lab host, this is a proposed adequacy check, not a measured
+result.
+
 ## Run
 
 Requires Python >=3.10, CHIA (`pip install -e /path/to/chia`), Icarus Verilog
