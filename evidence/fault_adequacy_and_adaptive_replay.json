@@ -1,0 +1,30 @@
+{
+  "provenance": "Transcribed from author's lab console output shared on 2026-09-24; full simulator logs remain on the lab host.",
+  "source_rtl_sha256": {
+    "digital_pll.v": "a248e88bf36741ba3c2ce417d287e919bf18ae4ccf64e6fe2fc4ddcdc56d49be",
+    "digital_pll_controller.v": "8eccb472147bcaa7832e9d4dcda3fa7c873accdd2a8dcdfbae95fb9281973480",
+    "ring_osc2x13.v": "986596591514a2176613dca298b12437641c24268e14824a33777d62b101b74c"
+  },
+  "human_fault_adequacy": {
+    "classification": "Human-authored post hoc control, not a CHIA agent proposal",
+    "candidate": "examples/phase1_reset_program.json",
+    "run_directory": "results/fault_adequacy_v1",
+    "statuses": {
+      "original": "pass",
+      "resetb_bypassed": "fail",
+      "phase1_held_low": "fail"
+    },
+    "reported_outcome": "Both missed faults detectable: PASS",
+    "interpretation": "The two faults missed by the frozen agent are detectable by the current top-level test language; the agent's measured 5/7 is unchanged."
+  },
+  "adaptive_offline_audit": {
+    "classification": "Infrastructure replay of three previously published agent proposals; not a new model run",
+    "run_directory": "results/adaptive_offline_audit_v1",
+    "reported_outcomes": [
+      "Offline primary statuses: MATCH",
+      "Evaluation status matrix: MATCH",
+      "Evaluation agent/baseline: 5 2 out of 7"
+    ],
+    "interpretation": "Demonstrates that the new split evaluator reproduces prior outcomes, not an adaptive effectiveness gain."
+  }
+}
