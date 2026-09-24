@@ -1,0 +1,33 @@
+{
+  "provenance": "Author-reported lab console output from results/delay_sweep_v2, September 24, 2026. Aggregate counts only; full raw simulator logs remain on the lab host.",
+  "scope": "Functional oscillator-delay perturbations, not transistor PVT or physical jitter/lock",
+  "candidates_sha256": "36afa0607da9661b519b52450e9fd33da5e5291e1c3401671ec4e4ec2f4b5453",
+  "rtl_sha256": {
+    "digital_pll.v": "a248e88bf36741ba3c2ce417d287e919bf18ae4ccf64e6fe2fc4ddcdc56d49be",
+    "digital_pll_controller.v": "8eccb472147bcaa7832e9d4dcda3fa7c873accdd2a8dcdfbae95fb9281973480",
+    "ring_osc2x13.v": "986596591514a2176613dca298b12437641c24268e14824a33777d62b101b74c"
+  },
+  "cases": {
+    "fast_90pct": {
+      "delay_multiplier": 0.9,
+      "agent_valid_count": 3,
+      "baseline_valid_count": 3,
+      "agent_detected_count": 4,
+      "baseline_detected_count": 3
+    },
+    "nominal_100pct": {
+      "delay_multiplier": 1.0,
+      "agent_valid_count": 3,
+      "baseline_valid_count": 3,
+      "agent_detected_count": 4,
+      "baseline_detected_count": 1
+    },
+    "slow_110pct": {
+      "delay_multiplier": 1.1,
+      "agent_valid_count": 3,
+      "baseline_valid_count": 3,
+      "agent_detected_count": 4,
+      "baseline_detected_count": 3
+    }
+  }
+}
