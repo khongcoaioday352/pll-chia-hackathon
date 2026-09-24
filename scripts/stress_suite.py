@@ -55,6 +55,8 @@ def main() -> None:
     ap.add_argument("--output", type=pathlib.Path, required=True)
     ap.add_argument("--expected-aggregates", type=pathlib.Path,
                     help="Optional published aggregate report to audit against")
+    ap.add_argument("--expected-matrix", type=pathlib.Path,
+                    help="Optional published per-test statuses to audit against")
     args = ap.parse_args()
     rtl, prior, out = args.rtl.resolve(), args.run.resolve(), args.output.resolve()
     if out.exists() and any(out.iterdir()):
@@ -131,6 +133,21 @@ def main() -> None:
         report["published_aggregates_match"] = matched
         (out / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
         print("Published stress summary:", "MATCH" if matched else "DIFF")
+        if not matched:
+            raise SystemExit(1)
+    if args.expected_matrix:
+        recorded = json.loads(args.expected_matrix.read_text())
+        matched = (
+            recorded["rtl_sha256"] == actual
+            and recorded["mutants"] == list(FAULTS)
+            and set(recorded["tests"]) == set(report["tests"])
+            and all(recorded["tests"][label]["statuses"] == row["statuses"]
+                    and sorted(recorded["tests"][label]["detected"]) == sorted(row["detected"])
+                    for label, row in report["tests"].items())
+        )
+        report["published_matrix_match"] = matched
+        (out / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
+        print("Published per-test matrix:", "MATCH" if matched else "DIFF")
         if not matched:
             raise SystemExit(1)
     print("Detailed summary:", out / "summary.json")
