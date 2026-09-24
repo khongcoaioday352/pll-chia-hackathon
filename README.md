@@ -71,6 +71,30 @@ python3 verify.py --rtl rtl_gf180_snapshot --candidate examples/agent_program.js
 python3 loop.py --rtl rtl_gf180_snapshot --rounds 3 --model opencode/big-pickle --output results/agent
 ```
 
+### Gemini API Free tier on the lab server
+
+If OpenCode Free rejects CHIA's custom agent, use Google's Gemini API through
+CHIA's OpenAI-compatible backend. This does not use Google Cloud trial credits.
+Confirm the key's project is Free tier in Google AI Studio. Never paste the key
+into the repository, a command argument, screenshots, or issue logs.
+
+```sh
+cd ~/pll-chia-hackathon
+"$HOME/pll-chia-venv/bin/python" -m pip install openai
+read -rsp 'Gemini API key: ' GEMINI_API_KEY
+echo
+export GEMINI_API_KEY
+"$HOME/pll-chia-venv/bin/python" loop.py --backend gemini --rtl rtl_gf180_snapshot --rounds 1 --output results/gemini_first
+unset GEMINI_API_KEY
+```
+
+`read -rsp` hides the key while typing; export it in the same shell that
+starts Ray. Results and agent logs belong under `results/` and are ignored by
+Git until reviewed. This backend uses Google's official OpenAI-compatible
+endpoint with `gemini-2.5-flash` by default; `--model` selects another available
+Gemini model. Successful authentication and model availability must be checked
+on the actual lab server.
+
 The first two commands verify the simulator and the generated-test compiler
 without AI. The last runs the CHIA agent loop. `--model` can name another
 OpenCode model.
