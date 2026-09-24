@@ -6,6 +6,17 @@
 
 **Comparison budget audit:** three passing agent candidates generate 7,260 ns of nominal simulated stimulus on the unmodified RTL; three passing fixed-baseline candidates generate 5,710 ns (agent/baseline 1.2715). See [per-test budget evidence](evidence/test_budget_audit.json) and reproduce without Gemini or a simulator using `python3 scripts/audit_test_budget.py --output results/test_budget_audit.json`. The script regenerates each Verilog testbench from its frozen JSON and audits its delays. Equal candidate count is not equal simulated time, CPU time, or strength; the 4/4 versus 1/4 comparison is **not time-matched**.
 
+**Matched-time follow-up:** after extending only the three fixed-baseline
+observation windows, both groups have 7,260 ns of nominal simulated stimulus
+on the passing original RTL. The lab run still reports 4/4 versus 1/4 on four
+primary faults and 5/7 versus 2/7 on seven post hoc stress faults. Its full
+[per-test matrix](evidence/time_matched_public_replay_matrix.json) was
+compared against the author's saved lab result: `MATCH (78 status cells
+checked)`. The [one-command offline demo](scripts/run_offline_demo.py) also
+reported `Published evidence: VERIFIED` on the lab host. These are
+reproductions and a post hoc sensitivity check, not independent new agent
+proposals. The full raw simulator logs remain on the lab server.
+
 See `TOP10_STRATEGY.md` for the stronger post-layout validation target and
 the evidence required before making that claim.
 See `PVT_OPTION.md` for the more ambitious PVT design direction and the
