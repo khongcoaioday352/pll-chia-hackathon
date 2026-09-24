@@ -86,7 +86,7 @@ python3 scripts/stress_suite.py --rtl rtl_gf180_snapshot --run evidence/gemini_3
 ```
 
 A matching run prints `Published stress summary: MATCH` and writes a full
-per-candidate result matrix to `results/stress_public_replay_v1/summary.json`.
+per-candidate result matrix to `results/stress_matrix_audit_v1/summary.json`.
 The September 24 lab run printed `Published stress summary: MATCH`, with three
 valid tests in each group, 5/7 versus 2/7 detected and no compile/tool errors.
 The subsequent lab replay also printed `Published per-test matrix: MATCH`,
@@ -106,9 +106,11 @@ without model credits, run:
 python3 scripts/check_fault_adequacy.py --rtl rtl_gf180_snapshot --output results/fault_adequacy_v1
 ```
 
-Report the outcome separately from the agent's 5/7. Until the command has
-been run on the lab host, this is a proposed adequacy check, not a measured
-result.
+The lab run reported `original: pass`, `resetb_bypassed: fail` and
+`phase1_held_low: fail`: `Both missed faults detectable: PASS`. This human
+control shows the language can expose both misses, **without increasing the
+agent's 5/7**. The console-provenance record is in
+[evidence/fault_adequacy_and_adaptive_replay.json](evidence/fault_adequacy_and_adaptive_replay.json).
 
 ## Experimental feedback-driven extension (not part of the measured result)
 
@@ -129,6 +131,11 @@ previous status vectors, rather than being described as a new agent result:
 ```sh
 python3 scripts/adaptive_experiment.py --rtl rtl_gf180_snapshot --proposal-summary evidence/gemini_36_three_v2/summary.json --expected-evaluation evidence/stress_public_replay_matrix.json --rounds 3 --output results/adaptive_offline_audit_v1
 ```
+
+The September 24 lab audit reported `Offline primary statuses: MATCH` and
+`Evaluation status matrix: MATCH`, reproducing 5/7 versus 2/7 using the saved
+candidates. This checks wiring and data separation; no model proposal was
+created in that run. See [console-provenance record](evidence/fault_adequacy_and_adaptive_replay.json).
 
 Only after the offline audit succeeds and model quota is available, a new
 adaptive CHIA run can use `--backend gemini --model gemini-3.6-flash` with a
