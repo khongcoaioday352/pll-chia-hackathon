@@ -29,6 +29,8 @@ def main() -> None:
     parser.add_argument("--rtl", type=pathlib.Path, required=True)
     parser.add_argument("--summary", type=pathlib.Path,
                         default=pathlib.Path("evidence/gemini_36_three_v2/summary.json"))
+    parser.add_argument("--expected", type=pathlib.Path,
+                        help="Public per-test matrix to compare against this new replay")
     parser.add_argument("--output", type=pathlib.Path, required=True)
     args = parser.parse_args()
     rtl, output = args.rtl.resolve(), args.output.resolve()
@@ -89,10 +91,28 @@ def main() -> None:
         nominal[label]["statuses"] == saved["tests"][label]["statuses"]
         and nominal[label]["original_pass"] == saved["tests"][label]["original_pass"]
         for label in labels)
+    if args.expected:
+        expected = json.loads(args.expected.read_text())
+        same = (expected["rtl_sha256"] == hashes
+                and expected["source_summary_sha256"] == report["source_summary_sha256"]
+                and expected["periods_ns"] == report["periods_ns"]
+                and set(expected["cases"]) == set(report["cases"]))
+        for period, case in report["cases"].items():
+            published = expected["cases"][period]
+            same = (same and set(published["tests"]) == set(case["tests"])
+                    and all(published["tests"][label]["statuses"] == row["statuses"]
+                            and published["tests"][label]["original_pass"] == row["original_pass"]
+                            and published["tests"][label]["detected"] == row["detected"]
+                            for label, row in case["tests"].items()))
+        report["published_matrix_match"] = bool(same)
     (output / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
     print("40 ns saved result:", "MATCH" if report["nominal_matches_frozen_run"] else "DIFF")
+    if args.expected:
+        print("Published reference-period matrix:",
+              "MATCH" if report["published_matrix_match"] else "DIFF")
     if not report["nominal_matches_frozen_run"] or any(
-            case["tool_errors"] for case in report["cases"].values()):
+            case["tool_errors"] for case in report["cases"].values()) or (
+            args.expected and not report["published_matrix_match"]):
         raise SystemExit(1)
 
 
