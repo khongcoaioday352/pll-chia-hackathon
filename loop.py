@@ -100,7 +100,7 @@ def main() -> None:
         agent = OpenAICompatLLM(
             model=model, timeout_seconds=180, retries=1,
             base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-            api_key=os.environ["GEMINI_API_KEY"], max_tokens=2048,
+            api_key=os.environ["GEMINI_API_KEY"], max_tokens=8192,
             log_dir=str(root / "agent_logs"),
         )
     else:
@@ -121,8 +121,16 @@ def main() -> None:
     ][:args.rounds]
     history: list[dict[str, Any]] = []
     candidates = [(f"baseline_{i}", item) for i, item in enumerate(baseline)]
+    # The goals are fixed from the public port specification, before mutants run.
+    goals = (
+        "DCO mode: compare measured output rates at trim=0 and a high trim value.",
+        "Feedback mode: test a divider setting other than 8 after enough settling time.",
+        "Reset or enable sequencing: verify a clear start/stop behavior.",
+    )
     for turn in range(args.rounds):
-        prompt = SPEC + "\nPrevious original-design observations:\n" + json.dumps(history)
+        prompt = (SPEC + "\nThis round, focus on: " + goals[turn % len(goals)]
+                  + "\nPrevious original-design observations:\n"
+                  + json.dumps(history))
         (root / f"prompt_{turn}.txt").write_text(prompt)
         response = get(agent.prompt.chia_remote(agent, prompt))
         raw = str(response.result)
