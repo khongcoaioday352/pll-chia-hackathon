@@ -96,9 +96,13 @@ def main() -> None:
     ap.add_argument("--ray-address", default=None)
     ap.add_argument("--proposal-summary", type=pathlib.Path,
                     help="Offline infrastructure check using frozen proposals; NOT a new agent run")
+    ap.add_argument("--expected-evaluation", type=pathlib.Path,
+                    help="Optional exact status matrix for an offline replay audit")
     args = ap.parse_args()
     if not 1 <= args.rounds <= 3:
         ap.error("rounds must be 1..3 to keep the fixed baseline equal in size")
+    if args.expected_evaluation and not args.proposal_summary:
+        ap.error("--expected-evaluation applies only to the offline frozen-proposal replay")
     if not args.proposal_summary and args.backend == "gemini" and not os.getenv("GEMINI_API_KEY"):
         ap.error("GEMINI_API_KEY missing; offline --proposal-summary needs no key")
     rtl, root = args.rtl.resolve(), args.output.resolve()
@@ -188,12 +192,31 @@ def main() -> None:
         report[group + "evaluation_detected"] = sorted({fault
             for label, row in tests.items() if label.startswith(group)
             for fault in row["evaluation"]["detected"]})
+    if offline:
+        primary_match = all(row["development"]["statuses"] ==
+                            replay["tests"][label]["statuses"]
+                            for label, row in tests.items())
+        report["offline_primary_status_match"] = primary_match
+        print("Offline primary statuses:", "MATCH" if primary_match else "DIFF")
+    if args.expected_evaluation:
+        expected = json.loads(args.expected_evaluation.read_text())
+        eval_match = (expected["rtl_sha256"] == actual and
+                      set(expected["tests"]) == set(tests) and
+                      all(row["evaluation"]["statuses"] ==
+                          expected["tests"][label]["statuses"]
+                          for label, row in tests.items()))
+        report["evaluation_status_match"] = eval_match
+        print("Evaluation status matrix:", "MATCH" if eval_match else "DIFF")
     (root / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
     print("Evaluation agent/baseline:", len(report["agent_evaluation_detected"]),
           len(report["baseline_evaluation_detected"]), "out of", len(ev)-1)
     print("Detailed summary:", root / "summary.json")
     if backend_error:
         raise SystemExit(2)
+    if offline and not report["offline_primary_status_match"]:
+        raise SystemExit(1)
+    if args.expected_evaluation and not report["evaluation_status_match"]:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
