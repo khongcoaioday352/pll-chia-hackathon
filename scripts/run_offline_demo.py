@@ -44,6 +44,9 @@ def main() -> None:
         EVIDENCE / "supplementary_console_summary.json")}
     inputs.update({"rtl/" + name: rtl / name for name in (
         "digital_pll.v", "digital_pll_controller.v", "ring_osc2x13.v")})
+    if args.include_time_matched:
+        recorded = EVIDENCE / "time_matched_console_summary.json"
+        inputs[str(recorded)] = ROOT / recorded
     missing = [name for name, path in inputs.items() if not path.is_file()]
     if missing:
         parser.error(f"missing public input files: {missing}")
@@ -70,6 +73,7 @@ def main() -> None:
     if args.include_time_matched:
         commands.append(("time_matched_post_hoc", [
             SCRIPTS / "time_matched_baseline.py", "--rtl", rtl,
+            "--expected-aggregates", EVIDENCE / "time_matched_console_summary.json",
             "--output", output / "time_matched"],
             output / "time_matched" / "summary.json"))
     for label, command, result in commands:
