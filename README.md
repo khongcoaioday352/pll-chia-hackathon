@@ -121,8 +121,11 @@ all agent proposals are fixed. The evaluation source variants do not exist on
 disk during proposal generation. Those seven definitions were created after
 the earlier PLLGuard experiments and were already known to the developers;
 this separation within a new run **does not make the evaluation historically
-blind**. Do not treat this new script as an improved measured result until a
-fresh model run and a separate baseline have actually finished.
+blind**. The third round is explicitly guided toward reset during operation
+and clockp[1], based on the already observed misses; this is guided coverage
+planning rather than autonomous discovery of those properties. Do not treat
+this script as an improved measured result until a fresh model run and a
+separate baseline have actually finished.
 
 First audit the orchestration without an API call, using the publicly saved
 three candidates. This is an infrastructure replay and must reproduce the
