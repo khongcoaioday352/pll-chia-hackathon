@@ -79,6 +79,13 @@
     "agent_detected_count": 5,
     "tool_or_compile_errors": [],
     "reported_outcome": "Published stress summary: MATCH",
-    "raw_replay_summary_file": "results/stress_public_replay_v1/summary.json on the author's lab host"
+    "raw_replay_summary_file": "results/stress_public_replay_v1/summary.json on the author's lab host",
+    "exact_matrix_audit": {
+      "provenance": "Transcribed from author's lab console output on 2026-09-24",
+      "command": "python3 scripts/stress_suite.py --rtl rtl_gf180_snapshot --run evidence/gemini_36_three_v2 --expected-aggregates evidence/supplementary_console_summary.json --expected-matrix evidence/stress_public_replay_matrix.json --output results/stress_matrix_audit_v1",
+      "reported_outcome": "Published stress summary: MATCH; Published per-test matrix: MATCH",
+      "tool_or_compile_errors": [],
+      "raw_audit_summary_file": "results/stress_matrix_audit_v1/summary.json on author's lab host"
+    }
   }
 }
