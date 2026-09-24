@@ -39,6 +39,12 @@ jobs:
             --run evidence/gemini_36_three_v2 \
             --expected-aggregates evidence/delay_sweep_console_summary.json \
             --output results/ci_delay
+      - name: Explore reference clock period sensitivity on both groups
+        run: |
+          python3 scripts/ref_period_sweep.py \
+            --rtl rtl_gf180_snapshot \
+            --summary evidence/gemini_36_three_v2/summary.json \
+            --output results/ci_ref_period
       - name: Save replay manifest and simulator logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -47,5 +53,6 @@ jobs:
           path: |
             results/ci_replay/
             results/ci_delay/
+            results/ci_ref_period/
           if-no-files-found: warn
           retention-days: 7
