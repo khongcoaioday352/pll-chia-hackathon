@@ -65,6 +65,28 @@ The RTL header describes this design as technically a frequency-locked loop;
 the project name follows its published `digital_pll` module name. The paper
 should state this distinction explicitly.
 
+## Post hoc time-matched baseline check (awaiting lab measurement)
+
+The first comparison matches the number of candidates (3 versus 3) but the
+agent's generated tests run for 7,260 simulated ns on the passing original RTL
+versus 5,710 ns for the fixed baseline. To check this potential confound,
+`scripts/time_matched_baseline.py` changes **only** the three baseline observe
+windows to 595, 580 and 800 ns; each then matches a frozen agent test's nominal
+simulated duration (1,220, 1,220 and 4,820 ns respectively). It reruns all six
+candidates against the same four primary and seven post hoc source variants.
+Run on a server with Icarus Verilog using an empty output directory:
+
+```sh
+python3 scripts/time_matched_baseline.py --rtl rtl_gf180_snapshot --summary evidence/gemini_36_three_v2/summary.json --output results/time_matched_baseline_v1
+```
+
+This is a **post hoc sensitivity check** planned after seeing the original
+results, not a prespecified benchmark or evidence that the two groups have
+equal CPU cost or equivalent test quality. No detection result should be claimed
+until an actual simulator run finishes, its matrix is inspected, and the full
+result is preserved. The measured 4/4 versus 1/4 and 5/7 versus 2/7 results
+above continue to refer only to the original fixed baseline.
+
 ## API-free replay of the measured result
 
 From the repository root, with CHIA-independent Python and Icarus Verilog (or
