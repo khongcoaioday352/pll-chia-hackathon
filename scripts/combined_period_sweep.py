@@ -24,10 +24,14 @@ def main() -> None:
     p.add_argument("--rtl", type=pathlib.Path, default=pathlib.Path("rtl_gf180_snapshot"))
     p.add_argument("--combined", type=pathlib.Path, required=True,
                    help="Results directory (or summary.json) from combined_coverage.py")
+    p.add_argument("--expected", type=pathlib.Path,
+                   help="Audit every per-test status against the published clean-host matrix")
     p.add_argument("--output", type=pathlib.Path, required=True)
     args = p.parse_args()
     summary_file = args.combined / "summary.json" if args.combined.is_dir() else args.combined
     source = json.loads(summary_file.read_text())
+    expected = json.loads(args.expected.read_text()) if args.expected else None
+    source_hash = hashlib.sha256(summary_file.read_bytes()).hexdigest()
     rtl, out = args.rtl.resolve(), args.output.resolve()
     if out.exists() and any(out.iterdir()):
         p.error("output must be new or empty")
@@ -49,9 +53,15 @@ def main() -> None:
     if len(selected) != len(set(selected)) or set(selected) - set(source["tests"]):
         p.error("source contains duplicate or missing candidate labels")
     candidates = {name: validate(source["tests"][name]["candidate"]) for name in selected}
+    if expected and (expected["rtl_sha256"] != actual
+                     or expected["faults"] != list(FAULTS)
+                     or expected["groups"] != names
+                     or expected["source_input_summary_sha256"] != source_hash
+                     or set(expected["periods"]) != {"30", "40", "50"}):
+        p.error("published clean-host matrix has incompatible inputs")
     sources = make_stress_sources(rtl, out / "sources")
     report = {"classification": "post hoc behavioral input-period sensitivity; not PVT or blind",
-              "source_summary_sha256": hashlib.sha256(summary_file.read_bytes()).hexdigest(),
+              "source_summary_sha256": source_hash,
               "rtl_sha256": actual, "faults": list(FAULTS), "groups": names, "periods": {}}
     for period in (30, 40, 50):
         changed = {name: validate({**candidate, "ref_period_ns": period})
@@ -66,17 +76,27 @@ def main() -> None:
         nominal_match = (period != 40 or all(
             scored["tests"][name]["statuses"] == source["tests"][name]["statuses"]
             for name in selected))
+        recorded = expected["periods"][str(period)] if expected else None
+        published_match = (recorded is None or
+                           (recorded["groups"] == groups and
+                            set(recorded["tests"]) == set(scored["tests"]) and
+                            all(recorded["tests"][name]["statuses"] == row["statuses"]
+                                and recorded["tests"][name]["original_pass"] == row["original_pass"]
+                                and recorded["tests"][name]["detected"] == row["detected"]
+                                for name, row in scored["tests"].items())))
         report["periods"][str(period)] = {"tests": scored["tests"], "groups": groups,
                                           "tool_errors": scored["tool_errors"],
-                                          "nominal_matrix_match": nominal_match}
+                                          "nominal_matrix_match": nominal_match,
+                                          "published_matrix_match": published_match}
         (out / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
         print(f"{period} ns: ", end="")
         print("; ".join(f"{group} {row['original_valid']}/4 valid, "
                         f"{len(row['detected'])}/7 detected"
                         for group, row in groups.items()),
               "| errors:", len(scored["tool_errors"]),
-              "| nominal:", "MATCH" if nominal_match else "DIFF", flush=True)
-        if scored["tool_errors"] or not nominal_match:
+              "| nominal:", "MATCH" if nominal_match else "DIFF",
+              "| published:", "MATCH" if published_match else "DIFF", flush=True)
+        if scored["tool_errors"] or not nominal_match or not published_match:
             raise SystemExit(1)
     print("Detailed summary:", out / "summary.json")
 
