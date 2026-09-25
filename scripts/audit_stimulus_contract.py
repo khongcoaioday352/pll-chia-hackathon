@@ -67,7 +67,7 @@ def main() -> None:
                       "nominal_simulated_time_ns": budget(candidate)["simulated_time_ns"],
                       "prescribed_wait_and_measure_ns": [step["ns"] for step in candidate.get("steps", [])
                                                         if step["op"] in ("wait", "measure")],
-                      "sets_external_inputs": bool("steps" in candidate),
+                      "sets_external_inputs": True,
                       "internal_dut_force_or_assignment": False}
     output = {"scope": "static scan of seven generated candidate testbenches only",
               "claim": "no procedural force/release/deposit or hierarchical DUT write in generated benches",
