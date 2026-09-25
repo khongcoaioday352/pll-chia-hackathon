@@ -37,13 +37,15 @@ def main() -> None:
     analysis = analyze_log(vsim_log.read_text(errors="replace"), expected)
     successful_vsim = any(row["step"] == "vsim" and row["returncode"] == 0
                           and not row["timed_out"] for row in old["steps"])
-    passed = (successful_vsim and analysis["measurements_complete"] and
+    observed = (successful_vsim and analysis["measurements_complete"] and
               analysis["program_pass_marker"] and not analysis["program_fail_marker"] and
-              not analysis["sdf_error_pattern_found"])
+              analysis["other_simulator_error_count"] == 0)
+    passed = observed and analysis["timing_check_error_count"] == 0
     result = {"classification": "private retrospective log audit; no simulation rerun",
               "original_corner": old["corner"], "vsim_log_sha256": hashlib.sha256(vsim_log.read_bytes()).hexdigest(),
               "original_summary_sha256": hashlib.sha256((args.run / "summary.json").read_bytes()).hexdigest(),
-              **analysis, "functional_assertions_passed_in_gate_run": bool(passed),
+              **analysis, "observable_output_assertions_met": bool(observed),
+              "functional_assertions_passed_in_gate_run": bool(passed),
               "lock_verified": False, "sdf_annotation_completeness_verified": False,
               "limitations": ["log parsing cannot prove complete SDF annotation or frequency lock",
                               "this audit does not prove that the routed netlist matches pinned RTL"]}
@@ -51,6 +53,9 @@ def main() -> None:
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     print("Existing", old["corner"], "run:", "PASS" if passed else "REVIEW REQUIRED")
     print("Measured:", analysis["measurements"], "complete:", analysis["measurements_complete"])
+    print("Output assertions observed:", bool(observed), "| timing check errors:",
+          analysis["timing_check_error_count"], "| other simulator errors:",
+          analysis["other_simulator_error_count"])
     print("Private audit:", args.output)
     if not passed:
         raise SystemExit(1)
