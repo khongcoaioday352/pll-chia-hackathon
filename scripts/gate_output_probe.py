@@ -23,6 +23,26 @@ def digest(path: pathlib.Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def analyze_log(log_text: str, expected_names: list[str]) -> dict:
+    # Questa prefixes console output with '# ' in batch mode. Normalize that
+    # prefix before interpreting measurements, diagnostics, or final status.
+    clean = re.sub(r"(?m)^\s*#\s?", "", log_text)
+    pairs = re.findall(r"(?m)^MEASURE ([A-Za-z][A-Za-z0-9_]{0,23})=(\d+)\s*$", clean)
+    actual_names = [name for name, _ in pairs]
+    complete = len(actual_names) == len(expected_names) and sorted(actual_names) == sorted(expected_names)
+    sdf_issue = bool(re.search(
+        r"(?im)^\s*(?:\*\*\s*(?:error|fatal)\b|error:)|"
+        r"(?i:sdf[^\n]*(?:failed to annotate|not found)|failed to annotate[^\n]*sdf)",
+        clean,
+    ))
+    return {"expected_measurements": expected_names,
+            "measurements": {name: int(value) for name, value in pairs},
+            "measurements_complete": complete,
+            "program_pass_marker": bool(re.search(r"(?m)^RESULT PASS PROGRAM\s*$", clean)),
+            "program_fail_marker": "RESULT FAIL" in clean,
+            "sdf_error_pattern_found": sdf_issue}
+
+
 def find_tool(name: str, questa_home: pathlib.Path) -> pathlib.Path:
     path = questa_home / "bin" / name
     if path.is_file():
@@ -68,6 +88,9 @@ def main() -> None:
     if rtl_hash != FROZEN_RTL_SHA256:
         ap.error("functional RTL differs from the frozen published snapshot")
     candidate = validate(json.loads(args.candidate.read_text()))
+    if "steps" not in candidate:
+        ap.error("gate probe needs a program with named output measurements")
+    expected_names = [step["name"] for step in candidate["steps"] if step["op"] == "measure"]
     bench = make_tb(candidate)
     if re.search(r"\b(?:force|release|deposit)\b|\bdut\s*\.", bench):
         ap.error("testbench contains a forbidden internal DUT operation/reference")
@@ -102,30 +125,26 @@ def main() -> None:
             break
     simulated = steps[-1]["step"] == "vsim" and steps[-1]["returncode"] == 0
     log_text = (args.output / "vsim.log").read_text(errors="replace") if simulated else ""
-    measurements = {k: int(v) for k, v in re.findall(r"(?m)^MEASURE (\w+)=(\d+)", log_text)}
-    passed = "RESULT PASS PROGRAM" in log_text and "RESULT FAIL" not in log_text
-    # SDF reports can contain benign lines such as "SDF errors: 0"; only
-    # flag a concrete simulator error or a failed/missing annotation here.
-    sdf_issue = bool(re.search(
-        r"(?im)^\s*(?:\*\*\s*(?:error|fatal)\b|error:)|"
-        r"(?i:sdf[^\n]*(?:failed to annotate|not found)|failed to annotate[^\n]*sdf)",
-        log_text,
-    ))
+    audit = analyze_log(log_text, expected_names)
+    passed = (simulated and audit["program_pass_marker"] and
+              not audit["program_fail_marker"] and audit["measurements_complete"] and
+              not audit["sdf_error_pattern_found"])
     result = {"classification": "private routed-netlist Questa output probe",
               "corner": args.corner, "sdf_selection": "-sdftyp with corner-specific SDF",
               "source_sha256": {p.name: digest(p) for p in [*sources, sdf]},
               "functional_rtl_sha256": rtl_hash, "candidate_sha256": digest(args.candidate),
-              "bench_sha256": digest(tb), "steps": steps, "measurements": measurements,
-              "functional_assertions_passed_in_gate_run": bool(simulated and passed and not sdf_issue),
-              "sdf_error_pattern_found": sdf_issue,
+              "bench_sha256": digest(tb), "steps": steps, **audit,
+              "functional_assertions_passed_in_gate_run": bool(passed),
               "lock_verified": False, "sdf_annotation_completeness_verified": False,
               "limitations": ["inspect local vsim.log for annotation coverage and timing warnings",
                               "functional assertion pass does not establish lock or PVT robustness",
                               "this check does not prove netlist provenance or match to pinned RTL"]}
     (args.output / "summary.json").write_text(json.dumps(result, indent=2) + "\n")
-    print("Output measurements:", measurements)
+    print("Output measurements:", audit["measurements"], "complete:", audit["measurements_complete"])
     print("Functional assertions:", "PASS" if result["functional_assertions_passed_in_gate_run"] else "NOT VERIFIED")
     print("Private logs and summary:", args.output)
+    if not passed:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
