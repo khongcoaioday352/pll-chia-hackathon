@@ -31,6 +31,7 @@ The [clean-host combined replay](https://github.com/khongcoaioday352/pll-chia-ha
 passed, and the [full 192-cell reference-period matrix](evidence/combined_period_ci_matrix.json)
 is pinned for future audits. Review the [curated live result](evidence/adaptive_reference_live_v3_public.json)
 and [period limitations](evidence/combined_period_sweep_console_2026-09-25.md)
+and the [author-authorized controller-response measurements](evidence/controller_response_lab_console_2026-09-25.md)
 before citing these numbers. Raw model authorship transcripts remain on the lab host.
 
 See `TOP10_STRATEGY.md` for the stronger post-layout validation target and
