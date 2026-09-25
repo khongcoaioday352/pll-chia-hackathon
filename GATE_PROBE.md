@@ -60,3 +60,10 @@ waive timing violations or declare any corner passing. It stops on compile
 failures, missing measurements, assertion failures, SDF annotation errors or
 other simulator errors. The aggregate status becomes
 `collected_with_timing_violations` if any corner reports timing-check errors.
+
+To compare the measured corner edge counts against the **same candidate** on
+the frozen behavioral RTL and verify that the corner runs use the same routed
+netlist and different SDF hashes, use
+`scripts/compare_gate_corners.py --run results/gate_batch_timing_v2 --output results/gate_compare_v1`.
+The comparison stays private under ignored `results/`; an edge rate inferred
+from a 200 ns window has one-edge resolution of 5 MHz and may include startup.
