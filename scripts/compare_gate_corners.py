@@ -36,7 +36,7 @@ def main() -> None:
         ap.error("requires a measured test program")
     measures = {step["name"]: step["ns"] for step in candidate["steps"]
                 if step["op"] == "measure"}
-    if not {"active", "stopped"} <= measures:
+    if not {"active", "stopped"} <= set(measures):
         ap.error("selected candidate needs active and stopped output measurements")
     rtl_hash = {name: sha256(args.rtl / name) for name in RTL_FILES}
     if rtl_hash != FROZEN_RTL_SHA256:
