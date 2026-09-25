@@ -59,11 +59,6 @@ jobs:
             --combined results/ci_combined \
             --expected evidence/combined_period_ci_matrix.json \
             --output results/ci_combined_period
-      - name: Characterize PLL edge counts across divider and reference period
-        run: |
-          python3 scripts/controller_operating_map.py \
-            --rtl rtl_gf180_snapshot \
-            --output results/ci_operating_map
       - name: Save replay manifest and simulator logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -75,6 +70,5 @@ jobs:
             results/ci_ref_period/
             results/ci_combined/
             results/ci_combined_period/
-            results/ci_operating_map/
           if-no-files-found: warn
           retention-days: 7
