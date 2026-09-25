@@ -34,3 +34,20 @@ If TC compiles, run BC and WC with **new output directories** by changing
 `--corner` and `--output`. Do not copy the private netlist, cell models, SDF,
 full Questa log, or lab paths into the public repository. Publish numerical
 results only after reviewing them and obtaining authorization.
+
+## Unattended sequential run
+
+`scripts/gate_batch.py` runs TC, BC, WC in that order without any model API or
+interactive prompt. It stops on a failed compilation, simulator error, missing
+result, or failed functional assertion. Each corner uses a separate private
+output directory; `summary.json` is a small local aggregate, not a proof of
+lock or complete SDF annotation. Run it in the background from the repository:
+
+```bash
+nohup "$HOME/pll-chia-venv/bin/python" scripts/gate_batch.py --lab "$HOME/stdcell-pll" --output results/gate_batch_v1 > results/gate_batch_v1.console.log 2>&1 < /dev/null &
+```
+
+Inspect `results/gate_batch_v1.console.log` and
+`results/gate_batch_v1/summary.json` later. Keep the private per-corner
+`driver_*.log`, `vlog_*.log` and `vsim.log` on the lab server. To repeat a run,
+choose a fresh `--output` directory.
