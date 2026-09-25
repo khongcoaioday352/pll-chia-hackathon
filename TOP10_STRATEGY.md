@@ -51,7 +51,7 @@ server; curated candidate and per-test status evidence is public.
 
 1. Confirm the latest GitHub Actions run and the two new static audits; resolve any real CI failure before release.
 2. Preserve the scope above in the 4-page paper and provide the public repository/release URL. Mark AI writing assistance as required by the organizers.
-3. If time and available lab inputs allow, obtain a genuine gate-level replay and archive setup, netlist/SDF provenance, observable result and failure cases. Otherwise omit post-layout claims.
+3. Run [read-only gate readiness](scripts/check_gate_readiness.py) before committing time to post-layout. The historical reference testbench's `GATESIM` branch assumes `locked=1` after 50 reference edges, so it cannot certify lock. If available inputs and a corrected observable oracle permit a genuine gate-level replay, archive setup, netlist/SDF provenance, outcomes and failure cases. Otherwise omit post-layout claims.
 4. Keep original prompts and agent provenance reviewable when safe to disclose; do not substitute curated status rows for full raw transcripts.
 
 The official [hackathon rules](https://agentic-arch.org/hackathon.html)
