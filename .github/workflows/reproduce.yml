@@ -26,6 +26,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y iverilog
           iverilog -V | head -n 2
+      - name: Audit generated testbenches for internal forcing
+        run: |
+          python3 scripts/audit_stimulus_contract.py \
+            --rtl rtl_gf180_snapshot \
+            --output results/ci_stimulus_contract.json
       - name: Replay frozen candidates and validate published matrices
         run: |
           python3 scripts/run_offline_demo.py \
@@ -70,5 +75,6 @@ jobs:
             results/ci_ref_period/
             results/ci_combined/
             results/ci_combined_period/
+            results/ci_stimulus_contract.json
           if-no-files-found: warn
           retention-days: 7
