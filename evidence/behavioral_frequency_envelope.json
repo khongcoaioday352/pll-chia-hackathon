@@ -1,0 +1,91 @@
+{
+  "claim_scope": "static functional-model frequency feasibility only; not proof of PLL lock",
+  "rtl_sha256": {
+    "digital_pll.v": "a248e88bf36741ba3c2ce417d287e919bf18ae4ccf64e6fe2fc4ddcdc56d49be",
+    "digital_pll_controller.v": "8eccb472147bcaa7832e9d4dcda3fa7c873accdd2a8dcdfbae95fb9281973480",
+    "ring_osc2x13.v": "986596591514a2176613dca298b12437641c24268e14824a33777d62b101b74c"
+  },
+  "derivation": "f_clockp0_MHz = 1000 / (4 * (osc_delay_base_ns + popcount(trim[25:0]) * osc_delay_per_bit_ns))",
+  "base_delay_ns": 1.168,
+  "delay_per_trim_bit_ns": 0.012,
+  "trim_bit_count": 26,
+  "modeled_min_mhz": 168.918919,
+  "modeled_max_mhz": 214.041096,
+  "predicted_edges_per_400ns_at_min": 67.567568,
+  "predicted_edges_per_400ns_at_max": 85.616438,
+  "cases": [
+    {
+      "reference_period_ns": 30,
+      "div": 6,
+      "target_mhz": 200.0,
+      "classification": "within modeled range"
+    },
+    {
+      "reference_period_ns": 30,
+      "div": 8,
+      "target_mhz": 266.666667,
+      "classification": "above modeled maximum"
+    },
+    {
+      "reference_period_ns": 30,
+      "div": 12,
+      "target_mhz": 400.0,
+      "classification": "above modeled maximum"
+    },
+    {
+      "reference_period_ns": 30,
+      "div": 16,
+      "target_mhz": 533.333333,
+      "classification": "above modeled maximum"
+    },
+    {
+      "reference_period_ns": 40,
+      "div": 6,
+      "target_mhz": 150.0,
+      "classification": "below modeled minimum"
+    },
+    {
+      "reference_period_ns": 40,
+      "div": 8,
+      "target_mhz": 200.0,
+      "classification": "within modeled range"
+    },
+    {
+      "reference_period_ns": 40,
+      "div": 12,
+      "target_mhz": 300.0,
+      "classification": "above modeled maximum"
+    },
+    {
+      "reference_period_ns": 40,
+      "div": 16,
+      "target_mhz": 400.0,
+      "classification": "above modeled maximum"
+    },
+    {
+      "reference_period_ns": 50,
+      "div": 6,
+      "target_mhz": 120.0,
+      "classification": "below modeled minimum"
+    },
+    {
+      "reference_period_ns": 50,
+      "div": 8,
+      "target_mhz": 160.0,
+      "classification": "below modeled minimum"
+    },
+    {
+      "reference_period_ns": 50,
+      "div": 12,
+      "target_mhz": 240.0,
+      "classification": "above modeled maximum"
+    },
+    {
+      "reference_period_ns": 50,
+      "div": 16,
+      "target_mhz": 320.0,
+      "classification": "above modeled maximum"
+    }
+  ],
+  "limitation": "inside range is necessary, not sufficient; startup, quantization, control loop behavior and physical effects are excluded"
+}
