@@ -31,6 +31,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--rtl", type=pathlib.Path, default=pathlib.Path("rtl_gf180_snapshot"))
     ap.add_argument("--output", type=pathlib.Path, required=True)
+    ap.add_argument("--expected", type=pathlib.Path,
+                    help="Require exact match to the published source-derived matrix")
     args = ap.parse_args()
     if args.output.exists():
         ap.error("output must not already exist")
@@ -81,6 +83,8 @@ def main() -> None:
         "cases": cases,
         "limitation": "inside range is necessary, not sufficient; startup, quantization, control loop behavior and physical effects are excluded",
     }
+    if args.expected and json.loads(args.expected.read_text()) != result:
+        ap.error("source-derived matrix differs from published expected result")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     print(f"Functional envelope: {min_mhz:.3f}–{max_mhz:.3f} MHz; "
