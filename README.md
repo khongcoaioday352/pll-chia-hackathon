@@ -44,6 +44,10 @@ This explains plateaus near 68 and 86 edges per 400 ns. Being within that
 range is necessary but does not prove lock, and the source's physical/SPICE
 frequency note must not be used as the RTL model's frequency range.
 This is read-only source analysis, not a new simulation or model proposal.
+A replay `pass` indicates only that a test assertion passed: the [feedback test
+claim audit](evidence/controller_response_lab_console_2026-09-25.md#what-the-historical-pass-flags-mean)
+shows that agent and baseline assertions can pass even when the requested
+frequency is outside the modeled oscillator range.
 
 See `TOP10_STRATEGY.md` for the stronger post-layout validation target and
 the evidence required before making that claim.
