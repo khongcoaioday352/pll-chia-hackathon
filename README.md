@@ -27,7 +27,7 @@ run as 3/3 valid. Across reference periods, combined agent versus matched
 control is 4/7 versus 4/7 at 30 ns (both 3/4 valid), 7/7 versus 4/7 at
 40 ns, and 7/7 versus 6/7 at 50 ns. This is guided post hoc RTL fault
 coverage, **not** physical PVT, blind generalization, or proof of PLL lock.
-The [clean-host combined replay](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36084427671)
+The [clean-host combined replay](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36084650810)
 passed, and the [full 192-cell reference-period matrix](evidence/combined_period_ci_matrix.json)
 is pinned for future audits. Review the [curated live result](evidence/adaptive_reference_live_v3_public.json)
 and [period limitations](evidence/combined_period_sweep_console_2026-09-25.md)
