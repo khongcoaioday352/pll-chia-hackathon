@@ -48,15 +48,15 @@ jobs:
             --output results/ci_ref_period
       - name: Replay combined agent and time-matched human control
         run: |
-          python3 scripts/combined_coverage.py \\
-            --rtl rtl_gf180_snapshot \\
-            --live evidence/adaptive_reference_live_v3_public.json \\
+          python3 scripts/combined_coverage.py \
+            --rtl rtl_gf180_snapshot \
+            --live evidence/adaptive_reference_live_v3_public.json \
             --output results/ci_combined
       - name: Sweep combined four-test groups across reference periods
         run: |
-          python3 scripts/combined_period_sweep.py \\
-            --rtl rtl_gf180_snapshot \\
-            --combined results/ci_combined \\
+          python3 scripts/combined_period_sweep.py \
+            --rtl rtl_gf180_snapshot \
+            --combined results/ci_combined \
             --output results/ci_combined_period
       - name: Save replay manifest and simulator logs
         if: always()
@@ -66,6 +66,8 @@ jobs:
           path: |
             results/ci_replay/
             results/ci_delay/
-            results/ci_ref_period/\n            results/ci_combined/\n            results/ci_combined_period/
+            results/ci_ref_period/
+            results/ci_combined/
+            results/ci_combined_period/
           if-no-files-found: warn
           retention-days: 7
