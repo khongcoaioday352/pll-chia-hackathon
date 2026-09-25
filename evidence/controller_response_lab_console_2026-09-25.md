@@ -51,6 +51,30 @@ specific edge counts; this does not establish convergence for other settings.
 The script's printed `pass` only checked that the recorded count was at least
 zero. It is not evidence that a target divider or lock condition was met.
 
+## What the historical `pass` flags mean
+
+The published feedback candidate `agent_1` checks only whether the
+`div=16` edge count exceeds the `div=6` count by more than 10; it does
+**not** assert either target frequency. At 40 ns its two target rates would
+be 150 MHz (below the modeled minimum) and 400 MHz (above the modeled
+maximum), yet the relative assertion passes. At 50 ns the corresponding
+120 MHz and 320 MHz targets are likewise outside the range and the relative
+assertion passes. At 30 ns the feasible 200 MHz `div=6` response is already
+close to the 214 MHz modeled maximum, so the 533.3 MHz `div=16` request
+cannot increase the observed count by the required margin; the original-RTL
+assertion fails. These are deductions from the pinned source and the published
+candidate and replay matrix, not a physical diagnosis of a chip.
+
+The fixed divider control uses `div=8` and accepts an observed count within
+±8% of the target. Its 30 ns target, 266.7 MHz, is above the model's
+214.0 MHz maximum and fails on the original RTL. At 50 ns its target is
+160 MHz, **below** the modeled 168.9 MHz minimum, but that minimum is still
+inside the control's ±8% acceptance interval (147.2–172.8 MHz), so this
+control can report `pass` without target-frequency lock. A simulator
+`pass` means an assertion passed; the project's mutation-detection scores
+remain useful as fault-sensitivity comparisons but cannot be read as a
+frequency-lock or PVT yield score.
+
 No Verilog `force` was applied to PLL internal signals or outputs by this
 script; it **did** set external input stimuli and prescribe clock period,
 wait times, and observation windows. The 27 reported measurements therefore
