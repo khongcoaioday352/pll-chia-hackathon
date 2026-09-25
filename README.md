@@ -34,6 +34,17 @@ and [period limitations](evidence/combined_period_sweep_console_2026-09-25.md)
 and the [author-authorized controller-response measurements](evidence/controller_response_lab_console_2026-09-25.md)
 before citing these numbers. Raw model authorship transcripts remain on the lab host.
 
+**Functional-model feasibility:** A [static source audit](scripts/audit_behavioral_envelope.py)
+derives a 168.919–214.041 MHz modeled oscillator range from the pinned
+`FUNCTIONAL` Verilog. Of the 12 divider/reference configurations in the
+[authorized lab edge-count table](evidence/controller_response_lab_console_2026-09-25.md),
+only two specify a nominal target rate within that modeled range; see the
+[pinned machine-readable matrix](evidence/behavioral_frequency_envelope.json).
+This explains plateaus near 68 and 86 edges per 400 ns. Being within that
+range is necessary but does not prove lock, and the source's physical/SPICE
+frequency note must not be used as the RTL model's frequency range.
+This is read-only source analysis, not a new simulation or model proposal.
+
 See `TOP10_STRATEGY.md` for the stronger post-layout validation target and
 the evidence required before making that claim.
 See `PVT_OPTION.md` for the more ambitious PVT design direction and the
