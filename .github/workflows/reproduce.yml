@@ -31,6 +31,12 @@ jobs:
           python3 scripts/audit_stimulus_contract.py \
             --rtl rtl_gf180_snapshot \
             --output results/ci_stimulus_contract.json
+      - name: Audit behavioral oscillator frequency envelope without simulation
+        run: |
+          python3 scripts/audit_behavioral_envelope.py \
+            --rtl rtl_gf180_snapshot \
+            --expected evidence/behavioral_frequency_envelope.json \
+            --output results/ci_behavioral_envelope.json
       - name: Replay frozen candidates and validate published matrices
         run: |
           python3 scripts/run_offline_demo.py \
@@ -76,5 +82,6 @@ jobs:
             results/ci_combined/
             results/ci_combined_period/
             results/ci_stimulus_contract.json
+            results/ci_behavioral_envelope.json
           if-no-files-found: warn
           retention-days: 7
