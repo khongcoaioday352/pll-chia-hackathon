@@ -17,6 +17,22 @@ reported `Published evidence: VERIFIED` on the lab host. These are
 reproductions and a post hoc sensitivity check, not independent new agent
 proposals. The full raw simulator logs remain on the lab server.
 
+**Completed post hoc extension (September 25):** The original three valid
+agent tests plus one later CHIA/Gemini phase/reset test give four passing
+candidates and detect 7/7 behavioral injected faults at a 40 ns reference
+period. Four time-matched controls detect 4/7 with the same 8,280 ns total
+nominal simulated time. The later *adaptive* run itself produced three
+proposals, of which only two passed the original RTL; do not describe that
+run as 3/3 valid. Across reference periods, combined agent versus matched
+control is 4/7 versus 4/7 at 30 ns (both 3/4 valid), 7/7 versus 4/7 at
+40 ns, and 7/7 versus 6/7 at 50 ns. This is guided post hoc RTL fault
+coverage, **not** physical PVT, blind generalization, or proof of PLL lock.
+The [clean-host combined replay](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36084427671)
+passed, and the [full 192-cell reference-period matrix](evidence/combined_period_ci_matrix.json)
+is pinned for future audits. Review the [curated live result](evidence/adaptive_reference_live_v3_public.json)
+and [period limitations](evidence/combined_period_sweep_console_2026-09-25.md)
+before citing these numbers. Raw model authorship transcripts remain on the lab host.
+
 See `TOP10_STRATEGY.md` for the stronger post-layout validation target and
 the evidence required before making that claim.
 See `PVT_OPTION.md` for the more ambitious PVT design direction and the
@@ -99,7 +115,8 @@ result. To additionally measure the post hoc time-matched baseline, pass
 
 The [reproduction workflow](.github/workflows/reproduce.yml) installs Icarus
 Verilog on Ubuntu and runs the offline demo with `--include-time-matched`.
-It replays the behavioral delay sweep too, then saves the manifest and\nsimulator logs as a short-lived workflow artifact.
+It replays the behavioral delay sweep too, then saves the manifest and
+simulator logs as a short-lived workflow artifact.
 The first [clean-host run](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36031432342)
 finished successfully at commit `e1d2015`, including the published matrices
 and all three behavioral delay cases. The author's original lab results and
@@ -325,8 +342,8 @@ python3 scripts/adaptive_experiment.py --rtl rtl_gf180_snapshot --backend gemini
 
 Use an empty output directory and examine `complete_comparable_run` before
 reporting any comparison. This is guided follow-up on already observed gaps,
-not a blind independent benchmark; the two remaining model calls must
-actually complete to produce a new three-test result.
+not a blind independent benchmark. The completed seeded run and its
+one invalid nominal test are reported in the post hoc extension above.
 
 Only after the offline audit succeeds and model quota is available, a new
 adaptive CHIA run can use `--backend gemini --model gemini-3.6-flash` with a
