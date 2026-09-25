@@ -21,6 +21,17 @@ At 50 ns all eight tests passed the unmodified RTL; the time-matched
 control missed `controller_decrease_disabled`, while the agent suite
 missed none. These identities were transcribed from the lab summary.
 
+The original-RTL logs explain the 30 ns validity failures. The frozen
+`agent_1` counted 81 edges at `div=6` and 85 at `div=16`, each in a
+400 ns window. Its assertion requires the second count to exceed the
+first by **more than 10**; the observed difference is 4. The
+`baseline_matched_2` counted 172 edges in 800 ns at `div=8`. Its
+fixed check expects approximately `8 × 800 / 30 = 213.3` edges,
+allowing ±8% (integer counts 197–230). Both tests therefore fail on
+unmodified RTL. These data show that the specific test assertions do
+not hold here; they do **not** by themselves establish oscillator
+saturation, controller lock status, or a physical PVT limit.
+
 No simulator, compilation, or test-format errors were reported. The
 40 ns re-evaluation exactly matched the previously published nominal
 per-test matrix. Tests that failed on the unmodified RTL contributed
