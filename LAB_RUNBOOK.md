@@ -1,5 +1,20 @@
 # Lab handoff: one host, Python available
 
+> **Status update, 2026-09-25:** The setup instructions below document the
+> historical first lab run. The repository is now on GitHub, CHIA/Gemini has
+> completed an original three-turn run, and the public artifact provides
+> offline replay. OpenCode's free tier did not work through the CHIA backend;
+> Gemini later returned quota errors on additional runs. Do not spend the
+> remaining submission time repeating installation or assuming credits.
+> For the next **read-only** lab task, run
+> `scripts/stage_model_provenance.py --run results/gemini_36_three_v2 --output results/provenance_stage_v1`
+> from a fresh checkout, review staged files locally, and keep any raw
+> model/provider logs private until separately approved for publication.
+> The current results and limitations are in [README.md](README.md) and
+> [TOP10_STRATEGY.md](TOP10_STRATEGY.md). None of the old SDF commands below
+> by themselves establish a completed post-layout CHIA agent replay.
+
+
 Run commands one at a time. Keep this project in `~/pll-chia-hackathon` and the
 existing hardware repository in `~/stdcell-pll`. Never run `git add .` in the
 hardware repository: it contains large generated outputs and an ORFS clone.
