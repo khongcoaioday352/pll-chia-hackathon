@@ -112,6 +112,20 @@ it never creates fresh model output or reclassifies the human test as an agent
 result. To additionally measure the post hoc time-matched baseline, pass
 `--include-time-matched` and inspect its result separately.
 
+## Static stimulus integrity audit
+
+The [stimulus contract audit](scripts/audit_stimulus_contract.py) regenerates the
+seven published testbenches from frozen candidates without simulating the PLL.
+It rejects Verilog `force`, `release`, `deposit`, and hierarchical writes into
+DUT signals; it records input reference periods and explicit simulated times.
+This establishes a narrow, inspectable **no internal DUT forcing** claim for
+these generated benches. It does not establish an absence of timed test
+stimuli, PLL lock, or physical PVT validity. Reproduce with:
+
+```sh
+python3 scripts/audit_stimulus_contract.py --rtl rtl_gf180_snapshot --output results/stimulus_contract.json
+```
+
 ## Independent clean-host replay on GitHub Actions
 
 The [reproduction workflow](.github/workflows/reproduce.yml) installs Icarus
