@@ -24,6 +24,8 @@ are prescribed by the candidate and are part of the experiment.
 Examine `results/gate_output_tc_v1/summary.json` plus **private** `vsim.log`.
 Any compilation failure, simulator error, timeout, SDF annotation warning,
 unknown output, or failing assertion must be reported as a diagnostic result.
+Timing-check violations remain visible alongside observed edge counts and
+prevent a timing-clean PASS.
 Check annotation coverage in the simulator log before claiming SDF behavior:
 the script cannot automatically certify complete annotation. A passing probe
 demonstrates only the stated output behavior for this candidate, this netlist,
@@ -51,3 +53,10 @@ Inspect `results/gate_batch_v1.console.log` and
 `results/gate_batch_v1/summary.json` later. Keep the private per-corner
 `driver_*.log`, `vlog_*.log` and `vsim.log` on the lab server. To repeat a run,
 choose a fresh `--output` directory.
+
+If TC produces only timing-check errors while output assertions are observed,
+add `--collect-timing-diagnostics` to gather BC and WC. This option does not
+waive timing violations or declare any corner passing. It stops on compile
+failures, missing measurements, assertion failures, SDF annotation errors or
+other simulator errors. The aggregate status becomes
+`collected_with_timing_violations` if any corner reports timing-check errors.
