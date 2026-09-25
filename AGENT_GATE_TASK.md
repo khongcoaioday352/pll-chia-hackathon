@@ -1,25 +1,13 @@
-# OpenCode gate diagnostic task (private, experimental)
+# Private gate diagnostics and hosted AI
 
-Work only in this disposable git worktree. Diagnose existing PLLGuard gate probe
-parsing or simulator setup. The launcher supplies only redacted measurements and
-diagnostic booleans in your prompt. Its permission configuration blocks shell,
-external directories and web access; independent checks run outside the model.
-Do not request or transmit raw PDK, routed netlist, SDF, SPEF, full Questa logs,
-secrets or model transcripts. Do not commit, push, publish or modify the lab.
+The routed netlist, PDK cell models, SDF files, Questa logs and diagnostics
+derived from them remain on the lab server. `scripts/agent_gate_cycle.py` is
+disabled because an unattended hosted model would receive private lab
+diagnostic information without explicit authorization.
 
-Goal: make `scripts/audit_saved_gate.py` accurately parse **existing** TC log
-measurements, with independent verification that every named measurement exists
-once and the simulator reports no fatal SDF error. If the saved log truly lacks
-measurements, report this honestly; do not synthesize values. When the audit
-passes, BC/WC probes can be run separately by the launcher. Investigate errors
-and edit only `scripts/audit_saved_gate.py`, `scripts/gate_output_probe.py`, and
-`scripts/gate_batch.py`. Do not edit candidates, reference benchmarks, published
-evidence, frozen RTL, fault definitions, hardware libraries or constraints.
-
-The launcher will run Python syntax checks and output probes for you. Do not alter RTL,
-force internal signals, insert artificial lock signals, change the reference
-frequency, or adjust measurement windows solely to make a failing test pass.
-An assertion pass means only its stated output behavior; it is not proof of
-frequency/phase lock, complete SDF annotation, silicon PVT coverage or physical
-signoff. Finish with a brief report of measured values, unresolved errors,
-files changed and commands run. Stop if the provider rejects a request.
+`scripts/gate_batch.py` still runs TC, BC and WC sequentially on the lab server
+without an AI backend. It keeps full output under ignored local `results/`
+and stops when a diagnostic fails. AI repair can be resumed with a local model
+that stays on the lab server or after a deliberate review of exactly what data
+may leave the lab. Neither option changes the requirement to inspect SDF
+annotation and observe the DUT output before any physical lock claim.
