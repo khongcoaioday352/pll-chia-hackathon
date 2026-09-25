@@ -29,6 +29,19 @@ increase **greater than 10**, while the observed increase is 4. The 30 ns
 steady `div=8` count of 86 edges/400 ns is consistent with the frozen
 baseline's 172 edges/800 ns on the unmodified RTL.
 
+The [source-derived functional envelope](behavioral_frequency_envelope.json)
+explains the edge-count plateaus without inferring lock. In the pinned Verilog,
+`hiclock` toggles every `delay = 1.168 + 0.012 × popcount(trim[25:0])` ns,
+and `clockp[0]` completes one cycle in four such delays. The resulting
+modeled range is **168.919–214.041 MHz**. It predicts approximately
+67.57–85.62 edges per 400 ns window at the two bounds; integer counts near
+68 and 86 in the lab are consistent with this behavior. Among the 12
+(reference period, divider) targets in the table, only 30 ns/div=6 and
+40 ns/div=8 have targets inside this modeled range. A target inside the
+range may still fail to lock or converge. The source comment about SPICE
+reaching 90 MHz concerns a different physical model; it does not change this
+functional simulation parameter range.
+
 Several independent tests measured ~86 edges in 400 ns, equivalent to about
 215 MHz **as a measured output edge rate in this functional model**. This
 pattern warrants examining the model and controller operating region; counts
