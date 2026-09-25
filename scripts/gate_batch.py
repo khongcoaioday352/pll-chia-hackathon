@@ -20,6 +20,8 @@ def main() -> None:
     ap.add_argument("--candidate", type=pathlib.Path,
                     default=pathlib.Path("examples/agent_program.json"))
     ap.add_argument("--corners", default="TC,BC,WC")
+    ap.add_argument("--collect-timing-diagnostics", action="store_true",
+                    help="Keep measuring corners when output assertions hold but timing checks fail; never claim signoff")
     ap.add_argument("--output", type=pathlib.Path, required=True)
     args = ap.parse_args()
     corners = args.corners.split(",")
@@ -31,6 +33,7 @@ def main() -> None:
     report: dict = {"classification": "private post-route diagnostic; no lock/PVT claim",
                     "corners_requested": corners, "corners_completed": [], "runs": {},
                     "all_functional_assertions_passed": False,
+                    "all_output_assertions_observed": False,
                     "lock_verified": False, "sdf_annotation_completeness_verified": False}
     failed = False
     for corner in corners:
@@ -47,7 +50,10 @@ def main() -> None:
             data = json.loads(summary_path.read_text())
             row = {"process_returncode": process.returncode,
                    "functional_assertions_passed": data["functional_assertions_passed_in_gate_run"],
+                   "observable_output_assertions_met": data["observable_output_assertions_met"],
                    "measurements": data["measurements"], "sdf_error_pattern_found": data["sdf_error_pattern_found"],
+                   "timing_check_error_count": data["timing_check_error_count"],
+                   "other_simulator_error_count": data["other_simulator_error_count"],
                    "source_sha256": data["source_sha256"],
                    "sdf_annotation_completeness_verified": False}
             report["corners_completed"].append(corner)
@@ -55,13 +61,24 @@ def main() -> None:
             row = {"process_returncode": process.returncode,
                    "error": "probe produced no summary; review private driver log"}
         report["runs"][corner] = row
-        if process.returncode or not row.get("functional_assertions_passed", False):
+        diagnostic_only = (args.collect_timing_diagnostics and
+                           row.get("observable_output_assertions_met") is True and
+                           row.get("timing_check_error_count", 0) > 0 and
+                           row.get("other_simulator_error_count") == 0)
+        if (process.returncode or not row.get("functional_assertions_passed", False)) and not diagnostic_only:
             failed = True
             print(f"STOP {corner}: probe did not establish functional assertion pass; review {args.output}/driver_{corner}.log", flush=True)
             break
-        print(f"PASS {corner}: measurements={row['measurements']} (lock/SDF completeness unverified)", flush=True)
+        print(f"{'TIMING VIOLATIONS' if diagnostic_only else 'PASS'} {corner}: measurements={row['measurements']}"
+              f" timing_errors={row['timing_check_error_count']} (lock/SDF completeness unverified)", flush=True)
     report["all_functional_assertions_passed"] = not failed and len(report["corners_completed"]) == len(corners)
-    report["status"] = "completed_diagnostic" if report["all_functional_assertions_passed"] else "stopped_for_review"
+    report["all_functional_assertions_passed"] &= all(
+        row.get("functional_assertions_passed") is True for row in report["runs"].values())
+    report["all_output_assertions_observed"] = not failed and len(report["corners_completed"]) == len(corners) and all(
+        row.get("observable_output_assertions_met") is True for row in report["runs"].values())
+    report["status"] = ("stopped_for_review" if failed else
+                        "collected_with_timing_violations" if not report["all_functional_assertions_passed"] else
+                        "completed_diagnostic")
     (args.output / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
     print("Summary:", args.output / "summary.json", flush=True)
     if failed:
