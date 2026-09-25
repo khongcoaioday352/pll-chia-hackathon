@@ -1,61 +1,59 @@
-# Competitive direction: PLLGuard
+# PLLGuard: evidence-based Top 10 assessment
 
-## Candidate title
+## Accurate project title
 
-**PLLGuard: A CHIA Loop for Agent-Generated and Post-Layout-Validated Tests of a GF180 Digital PLL**
+**PLLGuard: A CHIA Loop for Agent-Generated Functional Verification of a GF180 Digital PLL/FLL**
 
-Use this title only after at least one agent-generated test has actually been
-replayed on a gate-level GF180 netlist with an annotated SDF. Until then use:
-**PLLGuard: A CHIA Loop for Agent-Generated Verification of a GF180 Digital PLL**.
-The design's own RTL calls its behavior frequency locking; describe it as a
-digital PLL/FLL and make no claim of physical phase-noise measurement.
+The source describes frequency locking. The current artifact measures functional
+RTL test generation and injected-fault detection, not post-layout PLL lock,
+physical PVT robustness, jitter, or an analog PLL design. Use a title claiming
+post-layout validation only if an agent-authored candidate has actually been
+replayed against a gate-level netlist and annotated SDF with archived results.
 
-## Research question
+## Research question and agentic loop
 
-Can a feedback-driven CHIA agent produce valid input sequences and oracles for
-the PLL's enable/reset, DCO trim, and divider behavior, then prioritize tests
-which remain useful across functional RTL and post-layout simulation, at a
-limited simulator budget?
+Can a CHIA/Gemini agent author bounded, original-valid black-box PLL pin tests
+that detect more injected functional faults than fixed tests under the same
+number of proposals and a matched nominal simulator-time budget?
 
-## The loop to demonstrate
+1. The agent writes a JSON program of pin inputs, timed observations, and assertions.
+2. A CHIA/Ray simulator function compiles and executes it against pinned GF180 functional RTL.
+3. Original-RTL results enter the agent's next-turn feedback; invalid original tests do not earn mutation detections.
+4. After proposing tests, deterministic replay scores frozen candidates against fault variants; baseline candidates use the same evaluator.
+5. The public artifact pins RTL hashes, candidate JSON, fault definitions, exact per-test statuses, and no-key replay commands.
 
-1. Agent writes a bounded stimulus and assertion program for PLL pins.
-2. A CHIA simulator node compiles a testbench and runs it on original GF180 RTL.
-3. A deterministic oracle validates original behavior; invalid tests and
-   their diagnostics go back to the agent for revision.
-4. A frozen, withheld fault suite scores valid tests with the same budget as
-   a fixed sweep and the author's original testbench. No fault source or
-   identity is shown to the agent.
-5. Replay one or more high-value tests on the routed netlist with BC/TC/WC
-   SDF when these files, cell models, and Questa are available. Measure only
-   observable clock behavior, timing-sensitive failures, and simulation cost.
-   Do not score a functional assertion as a physical jitter metric.
+The recorded initial four-fault comparison was influenced by earlier prompt
+development. The seven-fault stress suite, reset follow-up, and control
+matching were post hoc. Do not describe any of these as historically blind.
 
-Steps 1–4 are needed for a credible hackathon submission. Step 5 is the
-distinguishing demonstration for the stronger title. The current repository
-implements the bounded test language, functional simulator, and fault scoring;
-CHIA end-to-end execution and gate-level replay have not been demonstrated.
+## Demonstrated results and limitations
 
-## Experimental evidence required
+| Evidence | What is supported now |
+| --- | --- |
+| Live CHIA/Gemini run | Three agent-authored initial candidates all passed original RTL and detected 4/4 selected faults; three fixed candidates detected 1/4. The later adaptive run generated three proposals, **two** original-valid, including the reset/phase candidate. |
+| Post hoc seven-fault evaluation | Initial three agent candidates detected 5/7 versus 2/7 fixed tests. Adding the later valid agent reset test gives four original-valid candidates detecting 7/7 at 40 ns; four human/fixed time-matched controls detect 4/7. Both groups use 8,280 ns nominal total simulated time. This does not match CPU effort or assertion strength. |
+| Period sensitivity | At 30 ns: both groups 3/4 valid and 4/7 detected. At 40 ns: 4/4 valid, agent 7/7 versus control 4/7. At 50 ns: 4/4 valid, agent 7/7 versus control 6/7. |
+| Functional frequency feasibility | Static pinned-RTL derivation gives 168.919–214.041 MHz. Only 2/12 target divider/reference combinations in the author-authorized diagnostic fall inside the modeled range. A passing assertion is not proof of PLL lock. |
+| Reproducibility and integrity | Earlier clean-host [GitHub Actions replay](https://github.com/khongcoaioday352/pll-chia-hackathon/actions/runs/36084650810) succeeded; public candidate and fault matrices can be replayed without an LLM key. The no-internal-DUT-force audit passed locally and on the author's lab host for seven published generated benches. The latest CI changes still need a confirmed successful run. |
+| Physical validation | No published replay of an agent-authored program with routed netlist and annotated BC/TC/WC SDF. No measured jitter, PVT yield, or post-layout lock claim. |
 
-| Evidence | Minimum proof | Current state |
-| --- | --- | --- |
-| Real agent loop | CHIA/Ray run with saved prompts, agent proposals, Verilog and logs | Pending a host where Ray starts |
-| Fair comparison | Same number of proposed tests and simulator budget; original testbench and fixed tests reported | Fixed tests pass; existing testbench not yet scored |
-| Discriminating benchmark | More than the four trivial seeded faults; valid and replayable faults frozen before evaluation | Pending design and validation |
-| Post-layout relevance | At least one identical stimulus replayed with netlist and annotated SDF | Requires lab outputs and Questa |
-| Scientific honesty | Original-pass/false-positive rate, failure cases, runtime, environment, source hashes | Adapter records most fields; no final run |
+Important source files: [live summary](evidence/gemini_36_three_v2/summary.json),
+[combined four-test replay](scripts/combined_coverage.py),
+[period matrix](evidence/combined_period_ci_matrix.json),
+[oscillator envelope](evidence/behavioral_frequency_envelope.json),
+[authorized lab diagnostic](evidence/controller_response_lab_console_2026-09-25.md),
+[stimulus integrity audit](scripts/audit_stimulus_contract.py), and
+[reproduction workflow](.github/workflows/reproduce.yml).
+Raw model transcripts and full original simulator logs still live on the lab
+server; curated candidate and per-test status evidence is public.
 
-## Go/no-go for the stronger claim
+## Submission priorities
 
-If the gate-level netlist/SDF is unavailable, fails to elaborate, or produces
-no interpretable clock trace before the writing cutoff, do not mention
-post-layout *results* in the title or abstract. Submit the functional CHIA
-loop with its real limitations if it runs. If the agent never completes a
-CHIA-managed test/simulator cycle, the artifact is not ready for submission
-as a completed CHIA hackathon loop.
+1. Confirm the latest GitHub Actions run and the two new static audits; resolve any real CI failure before release.
+2. Preserve the scope above in the 4-page paper and provide the public repository/release URL. Mark AI writing assistance as required by the organizers.
+3. If time and available lab inputs allow, obtain a genuine gate-level replay and archive setup, netlist/SDF provenance, observable result and failure cases. Otherwise omit post-layout claims.
+4. Keep original prompts and agent provenance reviewable when safe to disclose; do not substitute curated status rows for full raw transcripts.
 
-The organizers request a 4-page PDF and an open-source CHIA loop with its
-results; they list autonomous verification collateral and RTL-to-GDS as
-example tracks and also accept original ideas. Ranking is a committee
-judgment; satisfying the checklist does not guarantee top 10.
+The official [hackathon rules](https://agentic-arch.org/hackathon.html)
+request a four-page PDF and an open-sourced CHIA loop with results by Sep 24
+AoE. Top 10 is a human ranking, not an automatic threshold from mutation score.
