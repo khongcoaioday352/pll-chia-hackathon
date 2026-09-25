@@ -127,6 +127,26 @@ it never creates fresh model output or reclassifies the human test as an agent
 result. To additionally measure the post hoc time-matched baseline, pass
 `--include-time-matched` and inspect its result separately.
 
+## Private provenance review for the live model run
+
+The initial published summary contains agent candidates but not the original
+prompt and model-response text. If the author's saved lab run still contains
+`prompt_0.txt` through `prompt_2.txt`, `proposal_0.txt` through
+`proposal_2.txt`, and `summary.json`, run the
+[private staging check](scripts/stage_model_provenance.py):
+
+```sh
+python3 scripts/stage_model_provenance.py --run results/gemini_36_three_v2 --output results/provenance_stage_v1
+```
+
+It verifies all three extracted model candidates against the public summary,
+checks the original RTL and per-test scoring matrix, hashes the raw text, and
+redacts common lab paths and email addresses. It makes **no model or simulator
+call**. The output stays private in `results/`: automatic redaction is not a
+privacy guarantee. Inspect all six staged text files before choosing whether
+to publish them. Raw file hashes establish consistency with a saved run but
+cannot independently attest which model provider authored them.
+
 ## Static stimulus integrity audit
 
 The [stimulus contract audit](scripts/audit_stimulus_contract.py) regenerates the
