@@ -17,6 +17,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from verify import make_tb, validate
 from scripts.replay_summary import FROZEN_RTL_SHA256
+from scripts.triage_gate_log import summarize_errors
 
 
 def digest(path: pathlib.Path) -> str:
@@ -30,17 +31,19 @@ def analyze_log(log_text: str, expected_names: list[str]) -> dict:
     pairs = re.findall(r"(?m)^MEASURE ([A-Za-z][A-Za-z0-9_]{0,23})=(\d+)\s*$", clean)
     actual_names = [name for name, _ in pairs]
     complete = len(actual_names) == len(expected_names) and sorted(actual_names) == sorted(expected_names)
-    sdf_issue = bool(re.search(
-        r"(?im)^\s*(?:\*\*\s*(?:error|fatal)\b|error:)|"
-        r"(?i:sdf[^\n]*(?:failed to annotate|not found)|failed to annotate[^\n]*sdf)",
-        clean,
-    ))
+    errors = summarize_errors(clean)
+    categories = errors["category_counts"]
+    timing_count = categories.get("timing_check", 0)
+    blocking_count = errors["error_count"] - timing_count
     return {"expected_measurements": expected_names,
             "measurements": {name: int(value) for name, value in pairs},
             "measurements_complete": complete,
             "program_pass_marker": bool(re.search(r"(?m)^RESULT PASS PROGRAM\s*$", clean)),
             "program_fail_marker": "RESULT FAIL" in clean,
-            "sdf_error_pattern_found": sdf_issue}
+            "timing_check_error_count": timing_count,
+            "other_simulator_error_count": blocking_count,
+            "sdf_error_pattern_found": bool(categories.get("annotation_or_sdf", 0)),
+            **errors}
 
 
 def find_tool(name: str, questa_home: pathlib.Path) -> pathlib.Path:
@@ -126,14 +129,16 @@ def main() -> None:
     simulated = steps[-1]["step"] == "vsim" and steps[-1]["returncode"] == 0
     log_text = (args.output / "vsim.log").read_text(errors="replace") if simulated else ""
     audit = analyze_log(log_text, expected_names)
-    passed = (simulated and audit["program_pass_marker"] and
+    observed = (simulated and audit["program_pass_marker"] and
               not audit["program_fail_marker"] and audit["measurements_complete"] and
-              not audit["sdf_error_pattern_found"])
+              audit["other_simulator_error_count"] == 0)
+    passed = observed and audit["timing_check_error_count"] == 0
     result = {"classification": "private routed-netlist Questa output probe",
               "corner": args.corner, "sdf_selection": "-sdftyp with corner-specific SDF",
               "source_sha256": {p.name: digest(p) for p in [*sources, sdf]},
               "functional_rtl_sha256": rtl_hash, "candidate_sha256": digest(args.candidate),
               "bench_sha256": digest(tb), "steps": steps, **audit,
+              "observable_output_assertions_met": bool(observed),
               "functional_assertions_passed_in_gate_run": bool(passed),
               "lock_verified": False, "sdf_annotation_completeness_verified": False,
               "limitations": ["inspect local vsim.log for annotation coverage and timing warnings",
@@ -141,7 +146,10 @@ def main() -> None:
                               "this check does not prove netlist provenance or match to pinned RTL"]}
     (args.output / "summary.json").write_text(json.dumps(result, indent=2) + "\n")
     print("Output measurements:", audit["measurements"], "complete:", audit["measurements_complete"])
-    print("Functional assertions:", "PASS" if result["functional_assertions_passed_in_gate_run"] else "NOT VERIFIED")
+    print("Output assertions:", "OBSERVED" if observed else "NOT VERIFIED",
+          "| timing check errors:", audit["timing_check_error_count"],
+          "| other simulator errors:", audit["other_simulator_error_count"])
+    print("Timing-clean functional probe:", "PASS" if passed else "NOT VERIFIED")
     print("Private logs and summary:", args.output)
     if not passed:
         raise SystemExit(1)
