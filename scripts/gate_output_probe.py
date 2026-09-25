@@ -104,7 +104,13 @@ def main() -> None:
     log_text = (args.output / "vsim.log").read_text(errors="replace") if simulated else ""
     measurements = {k: int(v) for k, v in re.findall(r"(?m)^MEASURE (\w+)=(\d+)", log_text)}
     passed = "RESULT PASS PROGRAM" in log_text and "RESULT FAIL" not in log_text
-    sdf_issue = bool(re.search(r"(?i)(?:\*\* error|sdf.*(?:error|failed|not found)|failed.*annotat)", log_text))
+    # SDF reports can contain benign lines such as "SDF errors: 0"; only
+    # flag a concrete simulator error or a failed/missing annotation here.
+    sdf_issue = bool(re.search(
+        r"(?im)^\s*(?:\*\*\s*(?:error|fatal)\b|error:)|"
+        r"(?i:sdf[^\n]*(?:failed to annotate|not found)|failed to annotate[^\n]*sdf)",
+        log_text,
+    ))
     result = {"classification": "private routed-netlist Questa output probe",
               "corner": args.corner, "sdf_selection": "-sdftyp with corner-specific SDF",
               "source_sha256": {p.name: digest(p) for p in [*sources, sdf]},
